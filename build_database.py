@@ -1,25 +1,25 @@
 import os
 from config import db
-from models import Person
+from models import Word
 
 # Data to initialize database with
-PEOPLE = [
-    {"fname": "Doug", "lname": "Farrell"},
-    {"fname": "Kent", "lname": "Brockman"},
-    {"fname": "Bunny", "lname": "Easter"},
+WORDS = [
+    {"word_name": "ant"},
+    {"word_name": "bat"},
+    {"word_name": "cat"}
 ]
 
 
 # Delete database file if it exists currently
-if os.path.exists("people.db"):
-    os.remove("people.db")
+if os.path.exists("words.db"):
+    os.remove("words.db")
 
 # Create the database
 db.create_all()
 
-# iterate over the PEOPLE structure and populate the database
-for person in PEOPLE:
-    p = Person(lname=person.get("lname"), fname=person.get("fname"))
-    db.session.add(p)
+# iterate over the WORDS structure and populate the database
+for word in WORDS:
+    w = Word(word_name=word.get("word_name"))
+    db.session.add(w)
 
 db.session.commit()

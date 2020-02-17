@@ -12,158 +12,141 @@ basePath: /api
 
 # Paths supported by the server application
 paths:
-  /people:
+  /words:
     get:
-      operationId: people.read_all
+      operationId: words.read_all
       tags:
-        - People
-      summary: Read the entire set of people, sorted by last name
-      description: Read the entire set of people, sorted by last name
+        - Words
+      summary: Read the entire set of words, sorted by distance
+      description: Read the entire set of words, sorted by distance
       responses:
         200:
-          description: Successfully read people set operation
+          description: Successfully read words set operation
           schema:
             type: array
             items:
               properties:
-                person_id:
+                word_id:
+                  type: integer
+                  description: Id of the word
+                word_name:
                   type: string
-                  description: Id of the person
-                fname:
-                  type: string
-                  description: First name of the person
-                lname:
-                  type: string
-                  description: Last name of the person
-                timestamp:
-                  type: string
-                  description: Creation/Update timestamp of the person
+                  description: The word itself
+                distance:
+                  type: float
+                  description: Distance from target
 
     post:
-      operationId: people.create
+      operationId: words.create
       tags:
-        - People
-      summary: Create a person
-      description: Create a new person
+        - Words
+      summary: Create a word
+      description: Create a new word
       parameters:
-        - name: person
+        - name: word
           in: body
-          description: Person to create
+          description: Word to create
           required: True
           schema:
             type: object
             properties:
-              fname:
+              word_name:
                 type: string
-                description: First name of person to create
-              lname:
-                type: string
-                description: Last name of person to create
+                description: Name of word to create
       responses:
         201:
-          description: Successfully created person
+          description: Successfully created word
           schema:
             properties:
-              person_id:
+              word_id:
+                type: integer
+                description: Id of the word
+              word_name:
                 type: string
-                description: Id of the person
-              fname:
-                type: string
-                description: First name of the person
-              lname:
-                type: string
-                description: Last name of the person
-              timestamp:
-                type: string
-                description: Creation/Update timestamp of the person record
+                description: Name of word itself
+              distance:
+                type: float
+                description: Distance from target
 
-  /people/{person_id}:
+  /words/{word_id}:
     get:
-      operationId: people.read_one
+      operationId: words.read_one
       tags:
-        - People
-      summary: Read one person
-      description: Read one person
+        - Words
+      summary: Read one word
+      description: Read one word
       parameters:
-        - name: person_id
+        - name: word_id
           in: path
-          description: Id of the person to get
+          description: Id of the word to get
           type: integer
           required: True
       responses:
         200:
-          description: Successfully read person from people data operation
+          description: Successfully read word from words data operation
           schema:
             type: object
             properties:
-              person_id:
+              word_id:
+                type: integer
+                description: Id of the word
+              word_name:
                 type: string
-                description: Id of the person
-              fname:
-                type: string
-                description: First name of the person
-              lname:
-                type: string
-                description: Last name of the person
-              timestamp:
-                type: string
-                description: Creation/Update timestamp of the person record
+                description:  name of the word
+              distance:
+                type: float
+                description: Distance from target
 
     put:
-      operationId: people.update
+      operationId: words.update
       tags:
-        - People
-      summary: Update a person
-      description: Update a person
+        - Words
+      summary: Update a word
+      description: Update a word
       parameters:
-        - name: person_id
+        - name: word_id
           in: path
-          description: Id the person to update
+          description: Id the word to update
           type: integer
           required: True
-        - name: person
+        - name: word
           in: body
           schema:
             type: object
             properties:
-              fname:
+              word_name:
                 type: string
-                description: First name of the person
-              lname:
-                type: string
-                description: Last name of the person
+                description: Name of the word
+              # Include distance?
       responses:
         200:
-          description: Successfully updated person
+          description: Successfully updated word
           schema:
             properties:
-              person_id:
+              word_id:
+                type: integer
+                description: Id of the word
+              word_name:
                 type: string
-                description: Id of the person in the database
-              fname:
-                type: string
-                description: First name of the person
-              lname:
-                type: string
-                description: Last name of the person
-              timestamp:
-                type: string
-                description: Creation/Update timestamp of the person record
+                description: Name of the word
+              distance:
+                type: float
+                description: Distance from target
 
     delete:
-      operationId: people.delete
+      operationId: words.delete
       tags:
-        - People
-      summary: Delete a person from the people list
-      description: Delete a person
+        - Words
+      summary: Delete a word from the words list
+      description: Delete a word
       parameters:
-        - name: person_id
+        - name: word_id
           in: path
           type: integer
-          description: Id of the person to delete
+          description: Id of the word to delete
           required: true
       responses:
         200:
-          description: Successfully deleted a person
+          description: Successfully deleted a word
 
 

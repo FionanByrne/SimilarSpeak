@@ -1,18 +1,14 @@
-from datetime import datetime
 from config import db, ma
 
 
-class Person(db.Model):
-    __tablename__ = "person"
+class Word(db.Model):
+    __tablename__ = "word"
     person_id = db.Column(db.Integer, primary_key=True)
-    lname = db.Column(db.String(32))
-    fname = db.Column(db.String(32))
-    timestamp = db.Column(
-        db.DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
-    )
+    word_name = db.Column(db.String(32))
+    distance = db.Column(db.Float)
 
 
-class PersonSchema(ma.ModelSchema):
+class WordSchema(ma.ModelSchema):
     class Meta:
-        model = Person
+        model = Word
         sqla_session = db.session
