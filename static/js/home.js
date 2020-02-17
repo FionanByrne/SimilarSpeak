@@ -17,7 +17,7 @@ ns.model = (function() {
         'read': function() {
             let ajax_options = {
                 type: 'GET',
-                url: 'api/people',
+                url: 'api/words',
                 accepts: 'application/json',
                 dataType: 'json'
             };
@@ -29,14 +29,14 @@ ns.model = (function() {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
             })
         },
-        create: function(person) {
+        create: function(word) {
             let ajax_options = {
                 type: 'POST',
-                url: 'api/people',
+                url: 'api/words',
                 accepts: 'application/json',
                 contentType: 'application/json',
                 dataType: 'json',
-                data: JSON.stringify(person)
+                data: JSON.stringify(word)
             };
             $.ajax(ajax_options)
             .done(function(data) {
@@ -46,14 +46,14 @@ ns.model = (function() {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
             })
         },
-        update: function(person) {
+        update: function(word) {
             let ajax_options = {
                 type: 'PUT',
-                url: `api/people/${person.person_id}`,
+                url: `api/words/${word.word_id}`,
                 accepts: 'application/json',
                 contentType: 'application/json',
                 dataType: 'json',
-                data: JSON.stringify(person)
+                data: JSON.stringify(word)
             };
             $.ajax(ajax_options)
             .done(function(data) {
@@ -63,10 +63,10 @@ ns.model = (function() {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
             })
         },
-        'delete': function(person_id) {
+        'delete': function(word_id) {
             let ajax_options = {
                 type: 'DELETE',
-                url: `api/people/${person_id}`,
+                url: `api/words/${word_id}`,
                 accepts: 'application/json',
                 contentType: 'plain/text'
             };
@@ -85,35 +85,31 @@ ns.model = (function() {
 ns.view = (function() {
     'use strict';
 
-    let $person_id = $('#person_id'),
-        $fname = $('#fname'),
-        $lname = $('#lname');
+    let $word_id = $('#word_id'),
+        $word_name = $('#word_name');
 
     // return the API
     return {
         reset: function() {
-            $person_id.val('');
-            $lname.val('');
-            $fname.val('').focus();
+            $word_id.val('');
+            $word_name.val('');
         },
-        update_editor: function(person) {
-            $person_id.val(person.person_id);
-            $lname.val(person.lname);
-            $fname.val(person.fname).focus();
+        update_editor: function(word) {
+            $word_id.val(word.word_id);
+            $word_name.val(word.word_name);
         },
-        build_table: function(people) {
+        build_table: function(words) {
             let rows = ''
 
             // clear the table
-            $('.people table > tbody').empty();
+            $('.words table > tbody').empty();
 
-            // did we get a people array?
-            if (people) {
-                for (let i=0, l=people.length; i < l; i++) {
-                    rows += `<tr data-person-id="${people[i].person_id}">
-                        <td class="fname">${people[i].fname}</td>
-                        <td class="lname">${people[i].lname}</td>
-                        <td>${people[i].timestamp}</td>
+            // did we get a words array?
+            if (words) {
+                for (let i=0, l=words.length; i < l; i++) {
+                    rows += `<tr data-word-id="${words[i].word_id}">
+                        <td class="word_name">${words[i].word_name}</td>
+                        <td>${words[i].distance}</td>
                     </tr>`;
                 }
                 $('table > tbody').append(rows);
@@ -137,9 +133,8 @@ ns.controller = (function(m, v) {
     let model = m,
         view = v,
         $event_pump = $('body'),
-        $person_id = $('#person_id'),
-        $fname = $('#fname'),
-        $lname = $('#lname');
+        $word_id = $('#word_id'),
+        $word_name = $('#word_name');
 
     // Get the data from the model after the controller is done initializing
     setTimeout(function() {
@@ -147,21 +142,19 @@ ns.controller = (function(m, v) {
     }, 100)
 
     // Validate input
-    function validate(fname, lname) {
-        return fname !== "" && lname !== "";
+    function validate(word_name) {
+        return word_name !== "";
     }
 
     // Create our event handlers
     $('#create').click(function(e) {
-        let fname = $fname.val(),
-            lname = $lname.val();
+        let word_name = $word_name.val();
 
         e.preventDefault();
 
-        if (validate(fname, lname)) {
+        if (validate(word_name)) {
             model.create({
-                'fname': fname,
-                'lname': lname,
+                'word_name': word_name,
             })
         } else {
             alert('Problem with first or last name input');
@@ -169,17 +162,15 @@ ns.controller = (function(m, v) {
     });
 
     $('#update').click(function(e) {
-        let person_id = $person_id.val(),
-            fname = $fname.val(),
-            lname = $lname.val();
+        let word_id = $word_id.val(),
+            word_name = $word_name.val();
 
         e.preventDefault();
 
-        if (validate(fname, lname)) {
+        if (validate(word_name)) {
             model.update({
-                person_id: person_id,
-                fname: fname,
-                lname: lname,
+                word_id: word_id,
+                word_name: word_name,
             })
         } else {
             alert('Problem with first or last name input');
@@ -188,12 +179,12 @@ ns.controller = (function(m, v) {
     });
 
     $('#delete').click(function(e) {
-        let person_id = $person_id.val();
+        let word_id = $word_id.val();
 
         e.preventDefault();
 
-        if (validate('placeholder', lname)) {
-            model.delete(person_id)
+        if (validate('placeholder', word_name)) {
+            model.delete(word_id)
         } else {
             alert('Problem with first or last name input');
         }
@@ -206,28 +197,21 @@ ns.controller = (function(m, v) {
 
     $('table > tbody').on('dblclick', 'tr', function(e) {
         let $target = $(e.target),
-            person_id,
-            fname,
-            lname;
+            word_id,
+            word_name;
 
-        person_id = $target
+        word_id = $target
             .parent()
-            .attr('data-person-id');
+            .attr('data-word-id');
 
-        fname = $target
+        word_name = $target
             .parent()
-            .find('td.fname')
-            .text();
-
-        lname = $target
-            .parent()
-            .find('td.lname')
+            .find('td.word_name')
             .text();
 
         view.update_editor({
-            person_id: person_id,
-            fname: fname,
-            lname: lname,
+            word_id: word_id,
+            word_name: word_name,
         });
     });
 
