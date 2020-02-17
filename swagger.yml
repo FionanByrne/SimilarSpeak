@@ -33,7 +33,7 @@ paths:
                   type: string
                   description: The word itself
                 distance:
-                  type: float
+                  type: string
                   description: Distance from target
 
     post:
@@ -65,7 +65,7 @@ paths:
                 type: string
                 description: Name of word itself
               distance:
-                type: float
+                type: string
                 description: Distance from target
 
   /words/{word_id}:
@@ -94,7 +94,7 @@ paths:
                 type: string
                 description:  name of the word
               distance:
-                type: float
+                type: string
                 description: Distance from target
 
     put:
@@ -130,7 +130,7 @@ paths:
                 type: string
                 description: Name of the word
               distance:
-                type: float
+                type: string
                 description: Distance from target
 
     delete:

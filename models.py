@@ -5,7 +5,8 @@ class Word(db.Model):
     __tablename__ = "word"
     person_id = db.Column(db.Integer, primary_key=True)
     word_name = db.Column(db.String(32))
-    distance = db.Column(db.Float)
+    # TODO fix
+    distance = db.Column(db.String, default="0.0")
 
 
 class WordSchema(ma.ModelSchema):
