@@ -23,6 +23,10 @@ ns.model = (function() {
             };
             $.ajax(ajax_options)
             .done(function(data) {
+                if(data.error) {
+                    $('#').text(data.error).show();
+                }
+
                 $event_pump.trigger('model_read_success', [data]);
             })
             .fail(function(xhr, textStatus, errorThrown) {
@@ -58,6 +62,32 @@ ns.model = (function() {
             $.ajax(ajax_options)
             .done(function(data) {
                 $event_pump.trigger('model_update_success', [data]);
+            })
+            .fail(function(xhr, textStatus, errorThrown) {
+                $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
+            })
+        },
+        'search': function(word) {
+            let ajax_options = {
+                type: 'POST',
+                url: '/search',
+                accepts: 'application/json',
+                contentType: 'application/json',
+                dataType: 'json',
+                data: JSON.stringify(word),
+            };
+            $.ajax(ajax_options)
+            .done(function(data) {
+                if(data.error) {
+                    $('#errorAlert').text(data.error).show();
+                    $('#successAlert').hide();
+                }
+                else {
+                    $('#successAlert').text(data.name).show();
+                    $('#errorAlert').hide();
+                }
+
+                $event_pump.trigger('model_search_success', [data]);
             })
             .fail(function(xhr, textStatus, errorThrown) {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
@@ -183,10 +213,23 @@ ns.controller = (function(m, v) {
 
         e.preventDefault();
 
-        if (validate('placeholder', word_name)) {
+        if (validate(word_name)) {
             model.delete(word_id)
         } else {
-            alert('Problem with first or last name input');
+            alert('Problem with word name input');
+        }
+        e.preventDefault();
+    });
+
+    $('#search').click(function(e) {
+        let word_id = $word_id.val();
+
+        e.preventDefault();
+
+        if (validate(word_name)) {
+            model.search(word_id)
+        } else {
+            alert('Problem with word name input');
         }
         e.preventDefault();
     });
@@ -226,6 +269,10 @@ ns.controller = (function(m, v) {
     });
 
     $event_pump.on('model_update_success', function(e, data) {
+        model.read();
+    });
+
+    $event_pump.on('model_search_success', function(e, data) {
         model.read();
     });
 

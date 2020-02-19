@@ -4,9 +4,9 @@ from models import Word
 
 # Data to initialize database with
 WORDS = [
-    {"word_name": "ant"},
-    {"word_name": "bat"},
-    {"word_name": "cat"}
+    {"word_name": "word1"},
+    {"word_name": "word2"},
+    {"word_name": "word3"}
 ]
 
 

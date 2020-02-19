@@ -3,7 +3,7 @@ Main module of the server file
 """
 
 # 3rd party moudles
-from flask import render_template
+from flask import render_template, request, jsonify
 
 # local modules
 import config
@@ -26,6 +26,17 @@ def home():
     :return:        the rendered template "home.html"
     """
     return render_template("home.html")
+
+
+@connex_app.route("/search", methods=['POST'])
+def search_word():
+    word = request.form['word']
+    distance = "0.0"
+    if word:
+        print(word)
+        return jsonify({word: distance})
+
+    return jsonify({'error': 'Missing Data!'})
 
 
 if __name__ == "__main__":
