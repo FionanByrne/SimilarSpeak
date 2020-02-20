@@ -67,6 +67,38 @@ paths:
               distance:
                 type: string
                 description: Distance from target
+  /words/search:
+    post:
+      operationId: words.search
+      tags:
+        - Words
+      summary: Search for a word
+      description: Search for a new word
+      parameters:
+        - name: word
+          in: body
+          description: Word to search for
+          required: True
+          schema:
+            type: object
+            properties:
+              word_name:
+                type: string
+                description: Name of word to create
+      responses:
+        201:
+          description: Successfully searched word
+          schema:
+            properties:
+              word_id:
+                type: integer
+                description: Id of the word
+              word_name:
+                type: string
+                description: Name of word itself
+              distance:
+                type: string
+                description: Distance from target
 
   /words/{word_id}:
     get:

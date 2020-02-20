@@ -92,6 +92,45 @@ def create(word):
         )
 
 
+def search(word):
+    """
+    This function searches for a word
+
+    :param word:  word to search in words structure
+    :return:        201 on success, 406 on word exists
+    """
+    word_name = word.get("word_name")
+
+    reversed_word_name = word_name[::-1]
+
+    valid_word = True  # TODO: implement
+
+    # Can we insert this word?
+    if valid_word is None:
+
+        # Create a word instance using the schema and the passed in word
+        schema = WordSchema()
+        new_word = schema.load(word, session=db.session).data
+
+        # Add the word to the database
+        db.session.add(new_word)
+        db.session.commit()
+
+        # Serialize and return the newly created word in the response
+        data = schema.dump(new_word).data
+
+        return data, 201
+
+    # Otherwise, nope, word exists already
+    else:
+        abort(
+            409,
+            "Word {word_name} exists already".format(
+                word_name=word_name
+            ),
+        )
+
+
 def update(word_id, word):
     """
     This function updates an existing word in the words structure

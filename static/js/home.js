@@ -67,10 +67,10 @@ ns.model = (function() {
                 $event_pump.trigger('model_error', [xhr, textStatus, errorThrown]);
             })
         },
-        'search': function(word) {
+        search: function(word) {
             let ajax_options = {
                 type: 'POST',
-                url: '/search',
+                url: 'api/words/search',
                 accepts: 'application/json',
                 contentType: 'application/json',
                 dataType: 'json',
@@ -78,15 +78,6 @@ ns.model = (function() {
             };
             $.ajax(ajax_options)
             .done(function(data) {
-                if(data.error) {
-                    $('#errorAlert').text(data.error).show();
-                    $('#successAlert').hide();
-                }
-                else {
-                    $('#successAlert').text(data.name).show();
-                    $('#errorAlert').hide();
-                }
-
                 $event_pump.trigger('model_search_success', [data]);
             })
             .fail(function(xhr, textStatus, errorThrown) {
@@ -187,7 +178,7 @@ ns.controller = (function(m, v) {
                 'word_name': word_name,
             })
         } else {
-            alert('Problem with first or last name input');
+            alert('Problem with word input');
         }
     });
 
@@ -203,7 +194,7 @@ ns.controller = (function(m, v) {
                 word_name: word_name,
             })
         } else {
-            alert('Problem with first or last name input');
+            alert('Problem with word input');
         }
         e.preventDefault();
     });
@@ -222,18 +213,20 @@ ns.controller = (function(m, v) {
     });
 
     $('#search').click(function(e) {
-        let word_id = $word_id.val();
+        let word_name = $word_name.val();
 
         e.preventDefault();
 
         if (validate(word_name)) {
-            model.search(word_id)
+            model.search({
+                'word_name': word_name,
+            })
         } else {
             alert('Problem with word name input');
         }
         e.preventDefault();
-    });
-
+    }); 
+    
     $('#reset').click(function() {
         view.reset();
     })
