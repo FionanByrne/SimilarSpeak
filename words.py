@@ -6,6 +6,8 @@ words data
 from flask import make_response, abort
 from config import db
 from models import Word, WordSchema
+import json
+import sys
 
 
 def read_all():
@@ -59,7 +61,12 @@ def create(word):
     :param word:  word to create in words structure
     :return:        201 on success, 406 on word exists
     """
+    print(f'SUCCESS{word}', file=sys.stdout)  # TODO
     word_name = word.get("word_name")
+
+    new_word_name = word_name[::-1]
+
+    word = {'word_name': new_word_name}
 
     existing_word = (
         Word.query.filter(Word.word_name == word_name)
@@ -99,18 +106,19 @@ def search(word):
     :param word:  word to search in words structure
     :return:        201 on success, 406 on word exists
     """
+    print('SUCCESS', file=sys.stdout)
     word_name = word.get("word_name")
 
-    reversed_word_name = word_name[::-1]
+    reversed_word = word_name[::-1]
+    reversed_json = json.dumps({"word_name": reversed_word})
 
     valid_word = True  # TODO: implement
 
     # Can we insert this word?
-    if valid_word is None:
-
+    if valid_word:
         # Create a word instance using the schema and the passed in word
         schema = WordSchema()
-        new_word = schema.load(word, session=db.session).data
+        new_word = schema.load(reversed_json, session=db.session).data
 
         # Add the word to the database
         db.session.add(new_word)
@@ -125,7 +133,7 @@ def search(word):
     else:
         abort(
             409,
-            "Word {word_name} exists already".format(
+            "Word {word_name} not defined".format(
                 word_name=word_name
             ),
         )

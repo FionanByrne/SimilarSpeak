@@ -149,7 +149,6 @@ paths:
               word_name:
                 type: string
                 description: Name of the word
-              # Include distance?
       responses:
         200:
           description: Successfully updated word
