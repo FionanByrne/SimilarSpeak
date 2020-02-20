@@ -105,28 +105,25 @@ def search(word):
     :param word:  word to search in words structure
     :return:        201 on success, 406 on word exists
     """
-    print('SUCCESS', file=sys.stdout)
+    print(f'SUCCESS{word}', file=sys.stdout)
+
     word_name = word.get("word_name")
 
-    # TODO: Word Winder
-    new_word_name = word_name[::-1]
+    defined_word = True
+    if defined_word:
 
-    word = {'word_name': new_word_name}
+        # TODO: Word Finder
+        WORDS = [
+            {"word_name": word_name[::-1], "distance": 0.9},
+            {"word_name": word_name, "distance": 0.1},
+        ]
 
-    existing_word = (
-        Word.query.filter(Word.word_name == word_name)
-        .one_or_none()
-    )
+        for word in WORDS:
+            schema = WordSchema()
+            new_word = Word(word_name=word.get("word_name"),
+                            distance=word.get("distance"))
+            db.session.add(new_word)
 
-    # Can we insert this word?
-    if existing_word is None:
-
-        # Create a word instance using the schema and the passed in word
-        schema = WordSchema()
-        new_word = schema.load(word, session=db.session).data
-
-        # Add the word to the database
-        db.session.add(new_word)
         db.session.commit()
 
         # Serialize and return the newly created word in the response
@@ -138,7 +135,7 @@ def search(word):
     else:
         abort(
             409,
-            "Word {word_name} exists already".format(
+            "Word {word_name} undefined".format(
                 word_name=word_name
             ),
         )
