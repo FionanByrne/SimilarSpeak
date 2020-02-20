@@ -3,12 +3,10 @@ Main module of the server file
 """
 
 # 3rd party moudles
-from flask import render_template, request, jsonify
-
+from flask import render_template
 
 # local modules
 import config
-import sys
 
 # Get the application instance
 connex_app = config.connex_app
@@ -26,18 +24,6 @@ def home():
     :return:        the rendered template "home.html"
     """
     return render_template("home.html")
-
-
-# @connex_app.route("/search", methods=['POST'])
-# def search():
-#     name = request.form['name']
-#     # distance = "0.0"
-#     if name:
-#         newName = name[::-1]
-#         print('SUCCESS', file=sys.stdout)
-#         return jsonify({'name': newName})
-
-#     return jsonify({'error': 'Missing Data!'})
 
 
 if __name__ == "__main__":

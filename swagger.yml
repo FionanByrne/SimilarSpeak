@@ -67,6 +67,7 @@ paths:
               distance:
                 type: string
                 description: Distance from target
+
   /words/search:
     post:
       operationId: words.search
