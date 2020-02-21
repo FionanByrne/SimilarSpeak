@@ -7,6 +7,8 @@ from flask import make_response, abort
 from config import db
 from models import Word, WordSchema
 import sys
+from syllabifier import Syllabifier
+from itertools import chain
 
 
 def read_all():
@@ -58,7 +60,7 @@ def create(word):
     based on the passed in word data
 
     :param word:  word to create in words structure
-    :return:        201 on success, 406 on word exists
+    :returns:        201 on success, 406 on word exists
     """
     # print(f'SUCCESS{word}', file=sys.stdout)  # TODO
     word_name = word.get("word_name")
@@ -102,20 +104,26 @@ def search(word):
     """
     This function searches for a word
 
-    :param word:  word to search in words structure
+    :param word:  word (json) to search in words structure
     :return:        201 on success, 406 on word exists
     """
     print(f'SUCCESS{word}', file=sys.stdout)
 
     word_name = word.get("word_name")
 
-    defined_word = True
-    if defined_word:
+    syllabier = Syllabifier()
+
+    # Is word defined?
+    if syllabier.is_valid(word_name):
+
+        phoneme_syllables = syllabier.to_phoneme(word_name)
+        # Join syllables
+        phoneme_word = list(chain.from_iterable(phoneme_syllables))
+        input_phoneme2 = ' '.join(phoneme_word)
 
         # TODO: Word Finder
         WORDS = [
-            {"word_name": word_name[::-1], "distance": 0.9},
-            {"word_name": word_name, "distance": 0.1},
+            {"word_name": input_phoneme2, "distance": 0.2}
         ]
 
         for word in WORDS:
