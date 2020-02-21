@@ -1,6 +1,6 @@
 import nltk
 import os
-import sys
+# import sys
 
 
 class Syllabifier:
@@ -34,22 +34,19 @@ class Syllabifier:
         :param: input_word: word to convert to arpabet
         :returns:        string of translated word
         """
-
         # Generate list of phonemes for the word
         phones = []
 
-        # All variations of phoneme representations
-        for i in range(len(self.arpabet[input_word])):
-            phones_w = self.arpabet[input_word][i]
-            new_phones = []
-            for p in phones_w:
-                # omits the numbers from phone labels
-                new_p = p[:2]
-                new_phones.append(new_p)
-            phones.append(new_phones)
+        # Take first variation of phoneme representations
+        phones_w = self.arpabet[input_word][0]
+        for p in phones_w:
+            # omits the numbers from phone labels
+            new_p = p[:2]
+            phones.append(new_p)
 
-        print(f'WORD{i}', file=sys.stdout)
+        return phones
 
+    def to_syllables(self, input_phoneme):
         # Phoneme sonority values
         syl_dic = {
             'AA': 11,
@@ -95,6 +92,8 @@ class Syllabifier:
 
         # Split phoneme lists into syllables
         syllables = []
+        phones = []
+        phones.append(input_phoneme)
         for word in phones:
             boundary = 0
             for i in range(1, len(word)):
@@ -172,4 +171,4 @@ class Syllabifier:
                     boundary = i
 
             syllables.append(word[boundary:])
-            return syllables  # Take first translation
+            return syllables

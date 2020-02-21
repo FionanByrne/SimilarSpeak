@@ -8,7 +8,7 @@ from config import db
 from models import Word, WordSchema
 import sys
 from syllabifier import Syllabifier
-from itertools import chain
+import itertools
 
 
 def read_all():
@@ -65,10 +65,6 @@ def create(word):
     # print(f'SUCCESS{word}', file=sys.stdout)  # TODO
     word_name = word.get("word_name")
 
-    new_word_name = word_name[::-1]
-
-    word = {'word_name': new_word_name}
-
     existing_word = (
         Word.query.filter(Word.word_name == word_name)
         .one_or_none()
@@ -107,23 +103,28 @@ def search(word):
     :param word:  word (json) to search in words structure
     :return:        201 on success, 406 on word exists
     """
-    print(f'SUCCESS{word}', file=sys.stdout)
-
-    word_name = word.get("word_name")
+    print(f'WORD:{word}', file=sys.stdout)
+    word_name = word.get("word_name").lower()
 
     syllabier = Syllabifier()
 
     # Is word defined?
     if syllabier.is_valid(word_name):
+        # "many" -> "['M', 'EH', 'N', 'IY']"
+        phoneme_word = syllabier.to_phoneme(word_name)
+        print(f'PHONEMES: {phoneme_word}', file=sys.stdout)
 
-        phoneme_syllables = syllabier.to_phoneme(word_name)
-        # Join syllables
-        phoneme_word = list(chain.from_iterable(phoneme_syllables))
-        input_phoneme2 = ' '.join(phoneme_word)
+        # "['M', 'EH', 'N', 'IY']" -> [['M', 'EH'], ['N', 'IY']]
+        syllable_word = syllabier.to_syllables(phoneme_word)
+        print(f'SYLLABLES: {syllable_word}', file=sys.stdout)
+
+        # [['M', 'EH'], ['N', 'IY']] -> "M EH N IY"
+        syllable_word_flat = \
+            " ".join(list(itertools.chain.from_iterable(syllable_word)))
 
         # TODO: Word Finder
         WORDS = [
-            {"word_name": input_phoneme2, "distance": 0.2}
+            {"word_name": syllable_word_flat, "distance": 0.5}
         ]
 
         for word in WORDS:
