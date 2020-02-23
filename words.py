@@ -7,7 +7,7 @@ from flask import make_response, abort
 from config import db
 from models import Word, WordSchema
 import sys
-from syllabifier import Syllabifier
+from logic.syllabifier import Syllabifier
 import itertools
 
 
@@ -121,6 +121,7 @@ def search(word):
         # [['M', 'EH'], ['N', 'IY']] -> "M EH N IY"
         syllable_word_flat = \
             " ".join(list(itertools.chain.from_iterable(syllable_word)))
+
 
         # TODO: Word Finder
         WORDS = [
