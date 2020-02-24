@@ -24,3 +24,8 @@ db = SQLAlchemy(app)
 
 # Initialize Marshmallow (After SQLAlchemy)
 ma = Marshmallow(app)
+
+# Create words db for similar words
+if os.path.exists("data.words.db"):
+    os.remove("data/words.db")
+db.create_all()

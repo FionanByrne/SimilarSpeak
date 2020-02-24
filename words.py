@@ -106,24 +106,23 @@ def search(word):
     print(f'WORD:{word}', file=sys.stdout)
     word_name = word.get("word_name").lower()
 
-    syllabier = Syllabifier()
+    syllabifier = Syllabifier()
 
     # Is word defined?
-    if syllabier.is_valid(word_name):
+    if syllabifier.is_valid(word_name):
         # "many" -> "['M', 'EH', 'N', 'IY']"
-        phoneme_word = syllabier.to_phoneme(word_name)
+        phoneme_word = syllabifier.to_phoneme(word_name)
         print(f'PHONEMES: {phoneme_word}', file=sys.stdout)
 
         # "['M', 'EH', 'N', 'IY']" -> [['M', 'EH'], ['N', 'IY']]
-        syllable_word = syllabier.to_syllables(phoneme_word)
+        syllable_word = syllabifier.to_syllables(phoneme_word)
         print(f'SYLLABLES: {syllable_word}', file=sys.stdout)
 
         # [['M', 'EH'], ['N', 'IY']] -> "M EH N IY"
         syllable_word_flat = \
             " ".join(list(itertools.chain.from_iterable(syllable_word)))
 
-
-        # TODO: Word Finder
+        # TODO:
         WORDS = [
             {"word_name": syllable_word_flat, "distance": 0.5}
         ]
