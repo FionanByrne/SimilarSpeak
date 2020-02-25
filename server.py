@@ -7,6 +7,8 @@ from flask import render_template
 
 # local modules
 import config
+import os
+from config import db
 
 # Get the application instance
 connex_app = config.connex_app
@@ -23,7 +25,14 @@ def home():
 
     :return:        the rendered template "home.html"
     """
+    build_database()
     return render_template("home.html")
+
+
+def build_database():
+    if os.path.exists("data/words.db"):
+        os.remove("data/words.db")
+    db.create_all()
 
 
 if __name__ == "__main__":
