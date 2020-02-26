@@ -1,6 +1,5 @@
 import nltk
 import os
-import pickle
 # import sys
 
 
@@ -9,22 +8,22 @@ class Syllabifier:
 
     def __init__(self):
         # Import CMU pronunciation dictionary
-        self.arpabet = nltk.corpus.cmudict.dict()
-        self._expand_dict("data/dictionary.txt")
-        self._create_syllables()
+        self.arpabet = self._expand_dict("syllables/data/dictionary.txt")
+        # self._create_syllables()
 
     def _expand_dict(self, dictionary_path):
         """
         Expand phoneme dictionary with text file
         :param: supplementary: path to supplementary dict
         """
-        dictionary_path = "data/dictionary.txt"
-        if os.path.exists(dictionary_path):
-            # Extend dictionary to include additional words
+        init_dict = nltk.corpus.cmudict.dict()
+        if (os.path.exists):
             dic_file = open(dictionary_path)
             for line in dic_file:
                 line = line.split()
-                self.arpabet[line[0].lower()] = line[1:]
+                init_dict[line[0].lower()] = [line[1:]]
+
+        return init_dict
 
     def _create_syllables(self):
         """
@@ -51,7 +50,7 @@ class Syllabifier:
         phones = []
 
         # Take first variation of phoneme representations
-        phones_w = self.arpabet[input_word][0]
+        phones_w = self.arpabet[input_word.lower()][0]
         for p in phones_w:
             # omits the numbers from phone labels
             new_p = p[:2]
