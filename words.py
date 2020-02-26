@@ -4,10 +4,10 @@ words data
 """
 
 from flask import make_response, abort
+from syllables.syllabifier import Syllabifier
 from config import db
 from models import Word, WordSchema
 import sys
-from logic.syllabifier import Syllabifier
 import itertools
 
 

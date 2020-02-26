@@ -2,6 +2,7 @@ chardet==3.0.4
 Click==7.0
 clickclick==1.2.2
 connexion==2.6.0
+cmudict==0.4.4
 Flask==1.1.1
 flask-marshmallow==0.11.0
 Flask-SQLAlchemy==2.4.1
@@ -14,4 +15,3 @@ pathlib==1.0.1
 requests==2.22.0
 SQLAlchemy==1.3.13
 swagger-ui-bundle==0.0.6
-
