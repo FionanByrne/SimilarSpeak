@@ -25,8 +25,7 @@ def edits1(word):
     deletes = [L + R[1:] for L, R in splits if R and R[0] not in vowels]
     replaces = [L + c + R[1:] for L, R in splits if R for c in [[i] for i in consonants]]
     inserts = [L + c + R for L, R in splits for c in [[i] for i in consonants]]
-    edits = deletes + replaces + inserts
-    return list(filter(lambda e: pronouncable(e, 0.01), edits))
+    return (deletes + replaces + inserts)
 
 
 def edits2(word):
@@ -40,11 +39,12 @@ def syll_difference(p1, p2):
 
 
 # TODO
-test_word = ['M', 'EH']
-#print(edits1(test_word))
 sylls = [['AH', 'T'], ['M', 'EH', 'T']]
-# res = []
 syll = ["K", "AH", "T"]
-print(edits1(syll))
-#res = list(filter(lambda edit: print(pronouncable(["AH", "T"], 0.01)), edits1(syll)))
-#print(res)
+results = edits1(syll)
+
+for res in results:
+    if pronouncable(res, 0.01):
+        print(res)
+
+# res = list(filter(lambda edit: pronouncable(edit, 0.01)), edits1(syll)))
