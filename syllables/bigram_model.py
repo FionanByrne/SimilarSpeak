@@ -58,7 +58,7 @@ def create_model():
     return
 
 
-def pronouncable(syllable: str, thresh=0.001):
+def pronouncable(syllable: str, thresh=0.001, verbose=False):
     """
     :param syllable: Input syabble
     :param file_path: relative path to create conditional probabilities file
@@ -76,6 +76,9 @@ def pronouncable(syllable: str, thresh=0.001):
         # Compute conditional probabilities for phoneme bigrams
         cond_probs = list(map(lambda pair: cond_probs_dict[pair], bigrams))
 
+        if verbose:
+            print(dict(zip(bigrams, cond_probs)))
+
         # Are all cond probs above threshold value
         return all(cond_prob > thresh for cond_prob in cond_probs)
 
@@ -84,4 +87,3 @@ def pronouncable(syllable: str, thresh=0.001):
 # create_model()
 # result = pronouncable(["T", "AH", "T", "K"])
 # print(result)
-

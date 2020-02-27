@@ -41,13 +41,18 @@ def syll_difference(p1, p2):
 
 
 # TEST
-sylls = [['AH', 'T'], ['M', 'EH', 'T']]
-syll = ["K", "AH", "T"]
+word = "trains"
+s = Syllabifier()
+syll = s.to_syllables(s.to_phoneme(word))[0]
+# syll = ['T', 'R', 'AY', 'N', 'Z']
 results = edits1(syll)
 for res in results:
-    if pronouncable(res, 0.001):
+    if pronouncable(res, 0.001, False):
         print(res)
 
+print("--------------------------------------")
 
-print(pronouncable(['AH', 'T', 'W'], 0.01))
+test_word = ["T"]
+print(" ".join(test_word), ":")
+print(pronouncable(test_word, 0.001, True))
 # res = list(filter(lambda edit: pronouncable(edit, 0.01)), edits1(syll)))
