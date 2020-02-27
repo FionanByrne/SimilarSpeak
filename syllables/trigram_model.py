@@ -4,30 +4,26 @@ import pickle
 import itertools
 from syllabifier import Syllabifier
 
+COND_PROBS_PATH = "syllables/data/cond_probs.p"
+
 
 def create_model():
     """
     :param file_path: relative path to create conditional probabilities file
     """
     # syllable_split = nltk.word_tokenize(syllable)
-    cond_probs_path = "syllables/data/cond_probs.p"
 
     # Frequency of all phonemes (initially 0)
     accepted_phonemes = [i[0] for i in cmudict.phones()]
     accepted_phonemes.append('<s>')
     accepted_phonemes.append('</s>')
-    # unigrams_dict = dict([(char, 0) for char in accepted_phonemes])
 
-    # Get list of all syllables
+    # Get list of all syllables: ["<s>", "AH", "</s>", "<s>", "T", ...]
     syllabifier = Syllabifier()
     all_syllables = syllabifier.all_syllables()
 
-    # Count and conditional probabilties of phoneme pairs
-    # phoneme_pairs = list(permutations(accepted_phonemes, 2))
-    # phoneme_pairs = [p for p in itertools.product(accepted_phonemes, repeat=2)]
+    # Count conditional probabilties of phoneme tuples
     phoneme_tups = [p for p in itertools.product(accepted_phonemes, repeat=3)]
-    # bigrams_dict = dict([(char, 0) for char in phoneme_pairs])
-    # trigrams_dict = dict([(char, 0) for char in phoneme_tuples])
     tcf = TrigramCollocationFinder.from_words(all_syllables)
     bcf = BigramCollocationFinder.from_words(all_syllables)
     tri_dict = dict(sorted(tcf.ngram_fd.items(), key=lambda t: (-t[1], t[0])))
@@ -45,18 +41,16 @@ def create_model():
             cond_prob = 0.0
         cond_probs_dict[(p1, p2, p3)] = cond_prob
 
-    pickle.dump(cond_probs_dict, open(cond_probs_path, "wb"))
+    pickle.dump(cond_probs_dict, open(COND_PROBS_PATH, "wb"))
     return
 
 
 def pronouncable(syllable: str, thresh=0.001, verbose=False):
     """
-    :param syllable: Input syllable
-    :param file_path: relative path to create conditional probabilities file
+    :param syllable: Input syllable, eg: ['T', 'EH', 'S', 'T']
+    :param thresh: minimum conditional prob for all tuples in syllable
     """
-    # Load dictionary
-    cond_probs_path = "syllables/data/cond_probs.p"
-    cond_probs_dict = pickle.load(open(cond_probs_path, "rb"))
+    cond_probs_dict = pickle.load(open(COND_PROBS_PATH, "rb"))
     consonants = [i[0] for i in cmudict.phones() if not i[1] == ['vowel']]
     if len(syllable) == 0:  # Emtpy Syllable
         return True
@@ -65,7 +59,7 @@ def pronouncable(syllable: str, thresh=0.001, verbose=False):
     else:
         syllable = ['<s>'] + syllable + ['</s>']
         trigrams = list(ngrams(syllable, 3))
-        # Compute conditional probabilities for phoneme bigrams
+        # Get conditional probabilities for phoneme trigram
         cond_probs = list(map(lambda tuple: cond_probs_dict[tuple], trigrams))
 
         if verbose:
@@ -76,6 +70,12 @@ def pronouncable(syllable: str, thresh=0.001, verbose=False):
 
 
 # # TEST
-create_model()
-test_word = ['T', 'EY', 'S', 'T']
-print(pronouncable(test_word, 0.01, True))
+# create_model()
+# t1 = ['T', 'EY', 'S', 'T']
+# t2 = ['T', 'S', 'T']
+# t3 = ['T', 'EY']
+# t4 = ['OW']
+# print(pronouncable(t1, 0.01, True))
+# print(pronouncable(t2, 0.01, True))
+# print(pronouncable(t3, 0.01, True))
+# print(pronouncable(t4, 0.01, True))

@@ -1,6 +1,5 @@
 import nltk
 import os
-import itertools
 # import sys
 
 
