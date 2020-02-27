@@ -5,7 +5,6 @@ words data
 
 from flask import make_response, abort
 from syllables.syllabifier import Syllabifier
-from syllables.word_generator import *
 from config import db
 from models import Word, WordSchema
 import sys

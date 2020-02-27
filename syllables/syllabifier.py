@@ -1,15 +1,14 @@
 import nltk
 import os
+import itertools
 # import sys
 
 
 class Syllabifier:
-    all_syllables = []
 
     def __init__(self):
         # Import CMU pronunciation dictionary
         self.arpabet = self._expand_dict("syllables/data/dictionary.txt")
-        self._create_syllables()
 
     def _expand_dict(self, dictionary_path):
         """
@@ -25,15 +24,24 @@ class Syllabifier:
 
         return init_dict
 
-    def _create_syllables(self):
+    def all_syllables(self):
         """
         Create variable containing all syllables.
         """
+        all_syllables = []
+        seen_syllables = []
         for word in self.arpabet:
             phoneme_word = self.to_phoneme(word)
-            syllables_list = self.to_syllables(phoneme_word)
-            for syll in syllables_list:
-                self.all_syllables.append(syll)
+            sylls = self.to_syllables(phoneme_word)
+            new_word = []
+            for syll in sylls:
+                if syll not in seen_syllables:
+                    seen_syllables.append(syll)
+                    new_word += ['<s>'] + syll + ['</s>']
+
+            all_syllables += new_word
+
+        return all_syllables
 
     def is_valid(self, word):
         return word in self.arpabet

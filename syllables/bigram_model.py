@@ -1,7 +1,7 @@
 import cmudict
-from nltk import ngrams
+from nltk import ngrams, TrigramCollocationFinder, BigramCollocationFinder
 import pickle
-from itertools import permutations
+import itertools
 from syllabifier import Syllabifier
 
 
@@ -14,45 +14,36 @@ def create_model():
 
     # Frequency of all phonemes (initially 0)
     accepted_phonemes = [i[0] for i in cmudict.phones()]
-    unigrams_dict = dict([(char, 0) for char in accepted_phonemes])
-
-    # Count and conditional probabilties of phoneme pairs
-    phoneme_pairs = list(permutations(accepted_phonemes, 2))
-    bigrams_dict = dict([(char, 0) for char in phoneme_pairs])
-    cond_probs_dict = dict([(char, 0) for char in phoneme_pairs])
+    accepted_phonemes.append('<s>')
+    accepted_phonemes.append('</s>')
+    # unigrams_dict = dict([(char, 0) for char in accepted_phonemes])
 
     # Get list of all syllables
     syllabifier = Syllabifier()
-    all_syllables = syllabifier.all_syllables
+    all_syllables = syllabifier.all_syllables()
 
-    for _syll in all_syllables:
-        # Count unigrams (phonemes)
-        for phoneme in _syll:
-            unigrams_dict[phoneme] += 1
+    # Count and conditional probabilties of phoneme pairs
+    # phoneme_pairs = list(permutations(accepted_phonemes, 2))
+    # phoneme_pairs = [p for p in itertools.product(accepted_phonemes, repeat=2)]
+    phoneme_tups = [p for p in itertools.product(accepted_phonemes, repeat=3)]
+    # bigrams_dict = dict([(char, 0) for char in phoneme_pairs])
+    # trigrams_dict = dict([(char, 0) for char in phoneme_tuples])
+    tcf = TrigramCollocationFinder.from_words(all_syllables)
+    bcf = BigramCollocationFinder.from_words(all_syllables)
+    tri_dict = dict(sorted(tcf.ngram_fd.items(), key=lambda t: (-t[1], t[0])))
+    bi_dict = dict(sorted(bcf.ngram_fd.items(), key=lambda t: (-t[1], t[0])))
 
-        if(len(_syll) < 2):
-            continue
+    cond_probs_dict = dict([(char, 0) for char in phoneme_tups])
 
-        # Count bigrams: {"AH T" : 1, "AH K" : 3, ...}
-        bigrams = list(ngrams(_syll, 2))
-        for bigram in bigrams:
-            if bigram in bigrams_dict:
-                bigrams_dict[bigram] += 1
-            else:
-                bigrams_dict[bigram] = 1
-
-    # Phoneme followed by same phoneme has zero probability
-    for _symbol in [i[0] for i in cmudict.phones()]:
-        bigrams_dict[(_symbol, _symbol)] = 0
-
-    # Find conditional probability for each phoneme bigram in syllable
-    for p1, p2 in bigrams_dict:
-        count = bigrams_dict[(p1, p2)]
-        if unigrams_dict[p1] != 0:
-            cProb = count*1.0 / unigrams_dict[p1]
+    for t in tri_dict:
+        p1, p2, p3 = t[0], t[1], t[2]
+        tri_count = tri_dict[t]
+        bi_count = bi_dict[(p1, p2)]
+        if bi_count != 0:
+            cond_prob = tri_count * 1.0 / bi_count
         else:
-            cProb = 0.0
-        cond_probs_dict[(p1, p2)] = cProb
+            cond_prob = 0.0
+        cond_probs_dict[(p1, p2, p3)] = cond_prob
 
     pickle.dump(cond_probs_dict, open(cond_probs_path, "wb"))
     return
@@ -60,7 +51,7 @@ def create_model():
 
 def pronouncable(syllable: str, thresh=0.001, verbose=False):
     """
-    :param syllable: Input syabble
+    :param syllable: Input syllable
     :param file_path: relative path to create conditional probabilities file
     """
     # Load dictionary
@@ -72,18 +63,19 @@ def pronouncable(syllable: str, thresh=0.001, verbose=False):
     if all(p in consonants for p in syllable):  # No vowel sounds
         return False
     else:
-        bigrams = list(ngrams(syllable, 2))
+        syllable = ['<s>'] + syllable + ['</s>']
+        trigrams = list(ngrams(syllable, 3))
         # Compute conditional probabilities for phoneme bigrams
-        cond_probs = list(map(lambda pair: cond_probs_dict[pair], bigrams))
+        cond_probs = list(map(lambda tuple: cond_probs_dict[tuple], trigrams))
 
         if verbose:
-            print(dict(zip(bigrams, cond_probs)))
+            print(dict(zip(trigrams, cond_probs)))
 
         # Are all cond probs above threshold value
         return all(cond_prob > thresh for cond_prob in cond_probs)
 
 
 # # TEST
-# create_model()
-# result = pronouncable(["T", "AH", "T", "K"])
-# print(result)
+create_model()
+test_word = ['T', 'EY', 'S', 'T']
+print(pronouncable(test_word, 0.01, True))
