@@ -9,7 +9,7 @@ class Syllabifier:
     def __init__(self):
         # Import CMU pronunciation dictionary
         self.arpabet = self._expand_dict("syllables/data/dictionary.txt")
-        # self._create_syllables()
+        self._create_syllables()
 
     def _expand_dict(self, dictionary_path):
         """

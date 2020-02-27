@@ -5,6 +5,7 @@ words data
 
 from flask import make_response, abort
 from syllables.syllabifier import Syllabifier
+from syllables.word_generator import *
 from config import db
 from models import Word, WordSchema
 import sys
@@ -108,7 +109,7 @@ def search(word):
 
     syllabifier = Syllabifier()
 
-    # Is word defined?
+    # Is input word defined?
     if syllabifier.is_valid(word_name):
         # "many" -> "['M', 'EH', 'N', 'IY']"
         phoneme_word = syllabifier.to_phoneme(word_name)
@@ -124,11 +125,11 @@ def search(word):
 
         # TODO:
         WORDS = [
-            {"word_name": syllable_word_flat, "distance": 0.5}
+            {"word_name": syllable_word_flat, "distance": 0.1}
         ]
 
+        schema = WordSchema()
         for word in WORDS:
-            schema = WordSchema()
             new_word = Word(word_name=word.get("word_name"),
                             distance=word.get("distance"))
             db.session.add(new_word)
