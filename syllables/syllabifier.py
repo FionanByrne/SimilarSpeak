@@ -2,30 +2,38 @@ import nltk
 import os
 # import sys
 
+ADDITIONAL_WORDS_PATH = "syllables/data/dictionary.txt"
+
 
 class Syllabifier:
 
     def __init__(self):
         # Import CMU pronunciation dictionary
-        self.arpabet = self._expand_dict("syllables/data/dictionary.txt")
+        self.arpabet = self._expand_arpabet()
 
-    def _expand_dict(self, dictionary_path):
+    def _expand_arpabet(self):
         """
-        Expand phoneme dictionary with text file
+        Expand arpabet dictionary with text file
         :param: supplementary: path to supplementary dict
         """
         init_dict = nltk.corpus.cmudict.dict()
-        if (os.path.exists):
-            dic_file = open(dictionary_path)
+        if os.path.exists(ADDITIONAL_WORDS_PATH):
+            dic_file = open(ADDITIONAL_WORDS_PATH)
             for line in dic_file:
                 line = line.split()
                 init_dict[line[0].lower()] = [line[1:]]
 
         return init_dict
 
+    def arpabet(self):
+        """
+        Return a word->phonemes arpabet dictionary
+        """
+        return self.arpabet
+
     def all_syllables(self):
         """
-        Create variable containing all syllables.
+        Return tokenzied list of all syllables from cmu + additional dictionary
         """
         all_syllables = []
         for word in self.arpabet:
@@ -34,7 +42,7 @@ class Syllabifier:
             for syll in sylls:
                 all_syllables.append(['<s>'] + syll + ['</s>'])
 
-        # Remove tuplicate syllables
+        # Remove duplicate syllables (reducing processing time with less data)
         unique_sylls = set(tuple(i) for i in all_syllables)
         # Flatten list of lists into single lists of ordered phonemes
         return [i for syll in unique_sylls for i in syll]

@@ -1,8 +1,9 @@
 import cmudict
 from nltk import ngrams, TrigramCollocationFinder, BigramCollocationFinder
 import pickle
+import os
 import itertools
-from syllabifier import Syllabifier
+from syllables.syllabifier import Syllabifier
 
 COND_PROBS_PATH = "syllables/data/cond_probs.p"
 
@@ -47,6 +48,8 @@ def pronouncable(syllable: str, thresh=0.001, verbose=False):
     :param syllable: Input syllable, eg: ['T', 'EH', 'S', 'T']
     :param thresh: minimum conditional prob for all tuples in syllable
     """
+    if not os.path.exists(COND_PROBS_PATH):
+        create_model()
     cond_probs_dict = pickle.load(open(COND_PROBS_PATH, "rb"))
     consonants = [i[0] for i in cmudict.phones() if not i[1] == ['vowel']]
     if len(syllable) == 0:  # Emtpy Syllable

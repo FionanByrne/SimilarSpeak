@@ -8,6 +8,7 @@ from flask import render_template
 # local modules
 import config
 import os
+import syllables.trigram_model
 from config import db
 
 # Get the application instance
@@ -25,14 +26,15 @@ def home():
 
     :return:        the rendered template "home.html"
     """
-    build_database()
+    build_databases()
     return render_template("home.html")
 
 
-def build_database():
+def build_databases():
     if os.path.exists("data/words.db"):
         os.remove("data/words.db")
     db.create_all()
+    syllables.trigram_model.create_model()
 
 
 if __name__ == "__main__":

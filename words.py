@@ -103,20 +103,16 @@ def search(word):
     :param word:  word (json) to search in words structure
     :return:        201 on success, 406 on word exists
     """
-    print(f'WORD:{word}', file=sys.stdout)
     word_name = word.get("word_name").lower()
-
     syllabifier = Syllabifier()
-
     # Is input word defined?
     if syllabifier.is_valid(word_name):
         # "many" -> "['M', 'EH', 'N', 'IY']"
         phoneme_word = syllabifier.to_phoneme(word_name)
-        print(f'PHONEMES: {phoneme_word}', file=sys.stdout)
 
         # "['M', 'EH', 'N', 'IY']" -> [['M', 'EH'], ['N', 'IY']]
         syllable_word = syllabifier.to_syllables(phoneme_word)
-        print(f'SYLLABLES: {syllable_word}', file=sys.stdout)
+        # print(f'SYLLABLES: {syllable_word}', file=sys.stdout)
 
         # [['M', 'EH'], ['N', 'IY']] -> "M EH N IY"
         syllable_word_flat = \
@@ -137,10 +133,9 @@ def search(word):
 
         # Serialize and return the newly created word in the response
         data = schema.dump(new_word).data
-
         return data, 201
 
-    # Otherwise, nope, word exists already
+    # Otherwise, nope, word does not existy
     else:
         abort(
             409,
