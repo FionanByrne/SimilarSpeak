@@ -1,4 +1,4 @@
-from bigram_model import pronouncable
+from trigram_model import pronouncable
 import cmudict
 from syllabifier import Syllabifier
 

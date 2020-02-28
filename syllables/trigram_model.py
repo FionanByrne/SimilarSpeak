@@ -9,33 +9,30 @@ COND_PROBS_PATH = "syllables/data/cond_probs.p"
 
 def create_model():
     """
-    :param file_path: relative path to create conditional probabilities file
+    Create database for conditional probabilties of phoneme pairs
     """
-    # syllable_split = nltk.word_tokenize(syllable)
-
-    # Frequency of all phonemes (initially 0)
-    accepted_phonemes = [i[0] for i in cmudict.phones()]
-    accepted_phonemes.append('<s>')
-    accepted_phonemes.append('</s>')
-
     # Get list of all syllables: ["<s>", "AH", "</s>", "<s>", "T", ...]
     syllabifier = Syllabifier()
     all_syllables = syllabifier.all_syllables()
 
-    # Count conditional probabilties of phoneme tuples
-    phoneme_tups = [p for p in itertools.product(accepted_phonemes, repeat=3)]
+    # Count conditional probabilties of phoneme tuples with dictionaries
     tcf = TrigramCollocationFinder.from_words(all_syllables)
     bcf = BigramCollocationFinder.from_words(all_syllables)
     tri_dict = dict(sorted(tcf.ngram_fd.items(), key=lambda t: (-t[1], t[0])))
     bi_dict = dict(sorted(bcf.ngram_fd.items(), key=lambda t: (-t[1], t[0])))
 
+    # Create dictionary for count cond_prob of all phoneme tuples
+    accepted_phonemes = [i[0] for i in cmudict.phones()]
+    accepted_phonemes.append('<s>')
+    accepted_phonemes.append('</s>')
+    phoneme_tups = [p for p in itertools.product(accepted_phonemes, repeat=3)]
     cond_probs_dict = dict([(char, 0) for char in phoneme_tups])
 
     for t in tri_dict:
         p1, p2, p3 = t[0], t[1], t[2]
         tri_count = tri_dict[t]
         bi_count = bi_dict[(p1, p2)]
-        if bi_count != 0:
+        if bi_count > 1:
             cond_prob = tri_count * 1.0 / bi_count
         else:
             cond_prob = 0.0
@@ -71,10 +68,11 @@ def pronouncable(syllable: str, thresh=0.001, verbose=False):
 
 # # TEST
 # create_model()
-# t1 = ['T', 'EY', 'S', 'T']
+# t1 = ['AH', 'T', 'L']
 # t2 = ['T', 'S', 'T']
 # t3 = ['T', 'EY']
 # t4 = ['OW']
+# s = Syllabifier()
 # print(pronouncable(t1, 0.01, True))
 # print(pronouncable(t2, 0.01, True))
 # print(pronouncable(t3, 0.01, True))

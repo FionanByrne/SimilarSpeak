@@ -28,19 +28,16 @@ class Syllabifier:
         Create variable containing all syllables.
         """
         all_syllables = []
-        seen_syllables = []
         for word in self.arpabet:
             phoneme_word = self.to_phoneme(word)
             sylls = self.to_syllables(phoneme_word)
-            new_word = []
             for syll in sylls:
-                if syll not in seen_syllables:
-                    seen_syllables.append(syll)
-                    new_word += ['<s>'] + syll + ['</s>']
+                all_syllables.append(['<s>'] + syll + ['</s>'])
 
-            all_syllables += new_word
-
-        return all_syllables
+        # Remove tuplicate syllables
+        unique_sylls = set(tuple(i) for i in all_syllables)
+        # Flatten list of lists into single lists of ordered phonemes
+        return [i for syll in unique_sylls for i in syll]
 
     def is_valid(self, word):
         return word in self.arpabet
