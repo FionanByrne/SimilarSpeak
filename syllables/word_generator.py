@@ -52,8 +52,8 @@ for res in results:
 
 print("--------------------------------------")
 
-# t1 = ['T', 'R', 'EY', 'N', 'Z', 'D']
-# print(" ".join(t1), ":")
-# print(pronouncable(t1, 0.02, True))
+t1 = ['T', 'R', 'EY', 'N', 'Z', 'D']
+print(" ".join(t1), ":")
+print(pronouncable(t1, 0.02, True))
 
 # res = list(filter(lambda edit: pronouncable(edit, 0.01)), edits1(syll)))

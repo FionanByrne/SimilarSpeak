@@ -112,3 +112,6 @@ ENV/
 
 # Mac
 *.DS_Store
+
+# Jupyter Notebook tests
+/jupyter_nb

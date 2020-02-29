@@ -43,7 +43,7 @@ def create_model():
     return
 
 
-def pronouncable(syllable: str, thresh=0.001, verbose=False):
+def pronouncable(syllable: str, thresh=0.02, verbose=False):
     """
     :param syllable: Input syllable, eg: ['T', 'EH', 'S', 'T']
     :param thresh: minimum conditional prob for all tuples in syllable
@@ -59,6 +59,7 @@ def pronouncable(syllable: str, thresh=0.001, verbose=False):
     else:
         syllable = ['<s>'] + syllable + ['</s>']
         trigrams = list(ngrams(syllable, 3))
+
         # Get conditional probabilities for phoneme trigram
         cond_probs = list(map(lambda tuple: cond_probs_dict[tuple], trigrams))
 

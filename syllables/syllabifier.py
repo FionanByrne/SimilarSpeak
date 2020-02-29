@@ -1,6 +1,4 @@
 import nltk
-from collections import Counter
-import cmudict
 import os
 # import sys
 
@@ -175,7 +173,7 @@ class Syllabifier:
                         and i+1 < len(word)
                         and syl_dic[word[i+1]] == 11)
                     or (word[i] == 'W'
-                        and not (word[i-1] in ['K', 'T', 'D', 'TH'])
+                        and not (word[i-1] in ['K', 'T', 'D', 'TH', 'DH'])
                         and i+1 < len(word)
                         and syl_dic[word[i+1]] == 11)
                     or (word[i] == 'Y'
@@ -207,6 +205,8 @@ class Syllabifier:
 
 
 # # TESTS
+# from collections import Counter
+# import cmudict
 # # Test if every syllable in arpabet dictionary has one vowel sound
 # def num_vowels(self, syll):
 #     vowels = [i[0] for i in cmudict.phones() if i[1] == ['vowel']]
