@@ -1,4 +1,6 @@
 import nltk
+from collections import Counter
+import cmudict
 import os
 # import sys
 
@@ -21,7 +23,10 @@ class Syllabifier:
             dic_file = open(ADDITIONAL_WORDS_PATH)
             for line in dic_file:
                 line = line.split()
-                init_dict[line[0].lower()] = [line[1:]]
+                if line[0] == "-":
+                    init_dict.pop(line[1].lower())
+                else:
+                    init_dict[line[0].lower()] = [line[1:]]
 
         return init_dict
 
@@ -170,7 +175,7 @@ class Syllabifier:
                         and i+1 < len(word)
                         and syl_dic[word[i+1]] == 11)
                     or (word[i] == 'W'
-                        and not (word[i-1] in ['K', 'T', 'D', 'TH', 'DH'])
+                        and not (word[i-1] in ['K', 'T', 'D', 'TH'])
                         and i+1 < len(word)
                         and syl_dic[word[i+1]] == 11)
                     or (word[i] == 'Y'
@@ -191,8 +196,26 @@ class Syllabifier:
                         and i+2 < len(word) and syl_dic[word[i+2]] >= 8)
                     or (syl_dic[word[i]] == 11
                         and (syl_dic[word[i-1]] == 11 or word[i-1] == 'NG'))):
-                    syllables.append(word[boundary:i])
-                    boundary = i
+                    # If syllable will contain 1 vowel sound
+                    if (len(list(filter(lambda x:
+                            syl_dic[x] == 11, word[boundary:i]))) == 1):
+                        syllables.append(word[boundary:i])
+                        boundary = i
 
             syllables.append(word[boundary:])
             return syllables
+
+
+# # TESTS
+# # Test if every syllable in arpabet dictionary has one vowel sound
+# def num_vowels(self, syll):
+#     vowels = [i[0] for i in cmudict.phones() if i[1] == ['vowel']]
+#     return len(list((Counter(syll) & Counter(vowels)).elements()))
+
+
+# s = Syllabifier()
+# for word in s.arpabet:
+#     syllables_list = s.to_syllables(s.to_phoneme(word))
+#     for syll in syllables_list:
+#         if num_vowels(syll) != 1:
+#             print(word, ": ", syllables_list)

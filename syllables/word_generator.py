@@ -16,11 +16,11 @@ def generate_1edits(phoneme_sylls, thresh=0.01):
     return list
 
 
-def edits1(word):
+def edits1(syll):
     consonants = [i[0] for i in cmudict.phones() if not i[1] == ['vowel']]
     vowels = [i[0] for i in cmudict.phones() if i[1] == ['vowel']]
     # phonemes = consonants + vowels  # All phonemes in arpabet
-    splits = [(word[:i], word[i:]) for i in range(len(word) + 1)]
+    splits = [(syll[:i], syll[i:]) for i in range(len(syll) + 1)]
 
     deletes = [L + R[1:] for L, R in splits if R and R[0] not in vowels]
     replaces = [L + c + R[1:] for L, R in splits if R
@@ -30,9 +30,9 @@ def edits1(word):
     return (deletes + replaces + inserts)
 
 
-def edits2(word):
-    "All edits that are two edits away from `word`."
-    return (e2 for e1 in edits1(word) for e2 in edits1(e1))
+def edits2(syll):
+    "All edits that are two edits away from `syll`."
+    return (e2 for e1 in edits1(syll) for e2 in edits1(e1))
 
 
 # TODO
@@ -44,15 +44,16 @@ def syll_difference(p1, p2):
 word = "trains"
 s = Syllabifier()
 syll = s.to_syllables(s.to_phoneme(word))[0]
-# syll = ['T', 'R', 'AY', 'N', 'Z']
+syll = ['F', 'R', 'OW', 'N', 'Z', 'T']
 results = edits1(syll)
 for res in results:
-    if pronouncable(res, 0.001, False):
+    if pronouncable(res, 0.02, False):
         print(res)
 
 print("--------------------------------------")
 
-test_word = ["T"]
-print(" ".join(test_word), ":")
-print(pronouncable(test_word, 0.001, True))
+# t1 = ['T', 'R', 'EY', 'N', 'Z', 'D']
+# print(" ".join(t1), ":")
+# print(pronouncable(t1, 0.02, True))
+
 # res = list(filter(lambda edit: pronouncable(edit, 0.01)), edits1(syll)))
