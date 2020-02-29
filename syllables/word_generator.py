@@ -1,33 +1,64 @@
 from trigram_model import pronouncable
 import cmudict
+import itertools
 from syllabifier import Syllabifier
 
 
-def generate_1edits(phoneme_sylls, thresh=0.01):
+def generate_1edits(phoneme_sylls, thresh=0.02):
     """
     Generate pronouncable word 1 Levenshtein edit distance away
 
     :param phoneme_sylls: List of phonemes; e.g. [['M', 'EH'], ['N', 'IY']]
     :param thresh: Min conditional probability for accepting pronouncablity
     """
-    list = []
+    similar_syllables = []
     for syll in phoneme_sylls:
-        list += filter(lambda i: pronouncable(i, thresh), edits1(syll))
-    return list
+        similar_syllables += find_1edits(syll)
+        # list += list(filter(lambda i: pronouncable(i, thresh), find_1edits(syll)))
+    return similar_syllables
 
 
-def edits1(syll):
+def edits1(syll, is_vowel):
     consonants = [i[0] for i in cmudict.phones() if not i[1] == ['vowel']]
     vowels = [i[0] for i in cmudict.phones() if i[1] == ['vowel']]
-    # phonemes = consonants + vowels  # All phonemes in arpabet
     splits = [(syll[:i], syll[i:]) for i in range(len(syll) + 1)]
 
-    deletes = [L + R[1:] for L, R in splits if R and R[0] not in vowels]
-    replaces = [L + c + R[1:] for L, R in splits if R
-                for c in [[i] for i in consonants]]
-    inserts = [L + c + R for L, R in splits
-               for c in [[i] for i in consonants]]
-    return (deletes + replaces + inserts)
+    if(is_vowel):
+        replaces = [[i] for i in vowels if [i] != syll]
+        return (replaces)
+    else:  # consonants
+        inserts = [L + c + R for L, R in splits
+                   for c in [[i] for i in consonants]]
+
+        replaces = [L + c + R[1:] for L, R in splits
+                    if R for c in [[i] for i in consonants]]
+
+        deletes = [L + R[1:] for L, R in splits if R]
+
+        return (deletes + replaces + inserts)
+
+
+def find_1edits(syll, change_onset=True, change_coda=True, thresh=0.02):
+    # Split syllable into (oneset, nucleus, coda)
+    vowels = [i[0] for i in cmudict.phones() if i[1] == ['vowel']]
+    vowel_i = list(map(lambda i: i in vowels, syll)).index(True)
+    onset, nucleus, coda = syll[:vowel_i], [syll[vowel_i]], syll[vowel_i+1:]
+
+    edits = []
+
+    # Generate words by swapping out vowel
+    nucleus_swaps = [onset + i + coda for i in edits1(nucleus, True)]
+    edits += list(filter(lambda syll:
+                         pronouncable(syll, thresh), nucleus_swaps))
+    if(change_onset):
+        onset_swaps = [i + nucleus + coda for i in edits1(onset, False)]
+        edits += list(filter(lambda syll:
+                      pronouncable(syll, thresh), onset_swaps))
+    if(change_coda):
+        coda_swaps = [onset + nucleus + i for i in edits1(coda, False)]
+        edits += list(filter(lambda syll:
+                      pronouncable(syll, thresh), coda_swaps))
+    return edits
 
 
 def edits2(syll):
@@ -41,19 +72,17 @@ def syll_difference(p1, p2):
 
 
 # TEST
-word = "trains"
+word = "summer"
 s = Syllabifier()
-syll = s.to_syllables(s.to_phoneme(word))[0]
-syll = ['F', 'R', 'OW', 'N', 'Z', 'T']
-results = edits1(syll)
-for res in results:
-    if pronouncable(res, 0.02, False):
-        print(res)
+t1 = s.to_syllables(s.to_phoneme(word))
+
+print("word = ", t1), "/n"
+for i in t1:
+    print(f"{i} edits:")
+    print(find_1edits(i))
+
 
 print("--------------------------------------")
 
-t1 = ['T', 'R', 'EY', 'N', 'Z', 'D']
-print(" ".join(t1), ":")
-print(pronouncable(t1, 0.02, True))
-
-# res = list(filter(lambda edit: pronouncable(edit, 0.01)), edits1(syll)))
+# x = ['K', 'AH', 'K', 'T']
+# print(pronouncable(x, 0.02, True))
