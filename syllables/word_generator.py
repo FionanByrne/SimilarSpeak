@@ -1,5 +1,6 @@
 from trigram_model import pronouncable
 import cmudict
+import itertools
 from syllabifier import Syllabifier
 
 
@@ -10,10 +11,16 @@ def generate_1edits(phoneme_sylls, thresh=0.02):
     :param phoneme_sylls: List of phonemes; e.g. [['M', 'EH'], ['N', 'IY']]
     :param thresh: Min conditional probability for accepting pronouncablity
     """
-    similar_words = []
-    for syll in phoneme_sylls:
-        similar_words.append(find_1edits(syll))
-    return similar_words
+    if len(phoneme_sylls) == 1:  # 1-syllable word
+        return find_1edits(phoneme_sylls)
+    else:
+        similar_words = []
+        for i, syll in enumerate(phoneme_sylls):
+            similar_words += phoneme_sylls[i]
+            similar_words.append(find_1edits(syll))
+
+        # Return cartesian product of generated syllables (as list of lists)
+        return map(list, list(itertools.product(*similar_words)))
 
 
 def edits1(syll, is_vowel):
@@ -56,7 +63,7 @@ def find_1edits(syll, change_onset=True, change_coda=True, thresh=0.02):
         coda_swaps = [onset + nucleus + i for i in edits1(coda, False)]
         edits += list(filter(lambda syll:
                       pronouncable(syll, thresh), coda_swaps))
-    return edits
+    return ([syll] + edits)
 
 
 def edits2(syll):
@@ -70,9 +77,11 @@ def syll_difference(p1, p2):
 
 
 # TEST
-word = "summer"
+word = "rocket"
 s = Syllabifier()
 t1 = s.to_syllables(s.to_phoneme(word))
 
 print("word = ", t1)
-print(generate_1edits(t1))
+words = generate_1edits(t1)
+for i in words:
+    print(i)
