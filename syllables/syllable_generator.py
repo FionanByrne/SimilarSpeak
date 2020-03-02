@@ -4,7 +4,7 @@ import itertools
 from syllabifier import Syllabifier
 
 
-def generate_1edits(phoneme_sylls, thresh=0.02):
+def generate_1edits(phoneme_sylls, thresh=0.015):
     """
     Generate pronouncable word 1 Levenshtein edit distance away
 
@@ -12,15 +12,16 @@ def generate_1edits(phoneme_sylls, thresh=0.02):
     :param thresh: Min conditional probability for accepting pronouncablity
     """
     if len(phoneme_sylls) == 1:  # 1-syllable word
-        return find_1edits(phoneme_sylls)
+        return find_1edits(phoneme_sylls[0])
     else:
-        similar_words = []
-        for i, syll in enumerate(phoneme_sylls):
-            similar_words += phoneme_sylls[i]
-            similar_words.append(find_1edits(syll))
+        similar_syllables = []
+        for syll in phoneme_sylls:
+            similar_syllables.append([syll] + find_1edits(syll))
 
         # Return cartesian product of generated syllables (as list of lists)
-        return map(list, list(itertools.product(*similar_words)))
+        sim_words = map(list, list(itertools.product(*similar_syllables)))
+        # Remove occurences of input word
+        return filter(lambda x: x != phoneme_sylls, sim_words)
 
 
 def edits1(syll, is_vowel):
@@ -39,11 +40,10 @@ def edits1(syll, is_vowel):
                     if R for c in [[i] for i in consonants]]
 
         deletes = [L + R[1:] for L, R in splits if R]
-
         return (deletes + replaces + inserts)
 
 
-def find_1edits(syll, change_onset=True, change_coda=True, thresh=0.02):
+def find_1edits(syll, change_onset=True, change_coda=True, thresh=0.015):
     # Split syllable into (oneset, nucleus, coda)
     vowels = [i[0] for i in cmudict.phones() if i[1] == ['vowel']]
     vowel_i = list(map(lambda i: i in vowels, syll)).index(True)
@@ -51,24 +51,26 @@ def find_1edits(syll, change_onset=True, change_coda=True, thresh=0.02):
 
     edits = []
 
-    # Generate words by swapping out vowel
+    # Vowel edits:
     nucleus_swaps = [onset + i + coda for i in edits1(nucleus, True)]
     edits += list(filter(lambda syll:
                          pronouncable(syll, thresh), nucleus_swaps))
+    # Onset edits:
     if(change_onset):
         onset_swaps = [i + nucleus + coda for i in edits1(onset, False)]
         edits += list(filter(lambda syll:
                       pronouncable(syll, thresh), onset_swaps))
+    # Coda edits
     if(change_coda):
         coda_swaps = [onset + nucleus + i for i in edits1(coda, False)]
         edits += list(filter(lambda syll:
                       pronouncable(syll, thresh), coda_swaps))
-    return ([syll] + edits)
+    return edits
 
 
-def edits2(syll):
+def find_2edits(syll):
     "All edits that are two edits away from `syll`."
-    return (e2 for e1 in edits1(syll) for e2 in edits1(e1))
+    return (e2 for e1 in find_1edits(syll) for e2 in find_1edits(e1))
 
 
 # TODO
@@ -77,11 +79,19 @@ def syll_difference(p1, p2):
 
 
 # TEST
-word = "rocket"
+word = "record"
 s = Syllabifier()
 t1 = s.to_syllables(s.to_phoneme(word))
+s1 = t1[0]
 
-print("word = ", t1)
-words = generate_1edits(t1)
-for i in words:
-    print(i)
+print("syll = ", t1)
+# res = generate_1edits(t1)
+# for i in res:
+#     print(i)
+
+# words = generate_1edits(t1)
+# same = 0  # Count number of similar_words == input_word
+# for i in words:
+#     print(i)
+#     if i == t1:
+#         same += 1

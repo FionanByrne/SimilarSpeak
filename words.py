@@ -7,7 +7,7 @@ from flask import make_response, abort
 from syllables.syllabifier import Syllabifier
 from config import db
 from models import Word, WordSchema
-import sys
+# import sys
 import itertools
 
 
