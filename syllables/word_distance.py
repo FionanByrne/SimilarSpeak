@@ -1,5 +1,6 @@
 import pandas as pd
 import numpy as np
+from syllabifier import Syllabifier
 
 CONSONANTS_MATRIX_FILE = "bailey_consonants.csv"
 VOWEL_MATRIX_FILE = "bailey_vowels.csv"
@@ -9,6 +10,7 @@ class WordDistance:
 
     def __init__(self):
         # Import CMU pronunciation dictionary
+        self.gap_penalty = 1.0
         self.phoneme_distances = self._create_distances()
 
     def get_phoneme_distance(self, phoneme1, phoneme2):
@@ -38,26 +40,30 @@ class WordDistance:
         vowel_distances = self._normalize_matrix(vowel_distances)
 
         # Append consonant & phoneme matrices. Set empty values to max distance
-        phoneme_dist = consonant_distances.append(vowel_distances, sort=False)
-        gap_penalty = 1
-        phoneme_dist = phoneme_dist.fillna(gap_penalty)
+        phoneme_distances = consonant_distances.append(vowel_distances,
+                                                       sort=False)
+        phoneme_distances = phoneme_distances.fillna(self.gap_penalty)
 
         # Add gap penalty column and row:
-        phoneme_dist['-'] = gap_penalty
-        gap_row = [gap_penalty] * len(phoneme_dist.columns)
-        phoneme_dist.loc['-'] = gap_row
-        return phoneme_dist
+        phoneme_distances['-'] = self.gap_penalty
+        gap_row = [self.gap_penalty] * len(phoneme_distances.columns)
+        phoneme_distances.loc['-'] = gap_row
 
-    def _compute_distance(self, align1, align2):
+        return phoneme_distances
+
+    def _compute_distance(self, align1, align2, Verbose):
         align1.reverse()
         align2.reverse()
         distance = 0
         for i in range(0, len(align1)):
-            # if two AAs are the same, then output the letter
             distance += self.get_phoneme_distance(align1[i], align2[i])
-        return distance, align1, align2
+        if Verbose:
+            print(align1)
+            print(align2)
 
-    def word_dist(self, word1, word2, gap_penalty=1):
+        return distance
+
+    def word_dist(self, word1, word2, Verbose=False):
         """
         Using matrices, compute distance between two words.
         Words are computed in their non-syllabified form, eg:
@@ -70,15 +76,15 @@ class WordDistance:
 
         # Calculate scoring matrix according to Needleman-Wunsch algorithm
         for i in range(0, m + 1):
-            score[i][0] = gap_penalty * i
+            score[i][0] = self.gap_penalty * i
         for j in range(0, n + 1):
-            score[0][j] = gap_penalty * j
+            score[0][j] = self.gap_penalty * j
         for i in range(1, m + 1):
             for j in range(1, n + 1):
                 match = score[i - 1][j - 1] + \
                         self.get_phoneme_distance(word1[i-1], word2[j-1])
-                delete = score[i - 1][j] + gap_penalty
-                insert = score[i][j - 1] + gap_penalty
+                delete = score[i - 1][j] + self.gap_penalty
+                insert = score[i][j - 1] + self.gap_penalty
                 score[i][j] = min(match, delete, insert)
 
         # Traceback and compute the alignment
@@ -96,11 +102,11 @@ class WordDistance:
                 align2.append(word2[j-1])
                 i -= 1
                 j -= 1
-            elif score_current == score_left + gap_penalty:
+            elif score_current == score_left + self.gap_penalty:
                 align1.append(word1[i-1])
                 align2.append('-')
                 i -= 1
-            elif score_current == score_up + gap_penalty:
+            elif score_current == score_up + self.gap_penalty:
                 align1.append('-')
                 align2.append(word2[j-1])
                 j -= 1
@@ -115,14 +121,19 @@ class WordDistance:
             align2.append(word2[j-1])
             j -= 1
 
-        return self._compute_distance(align1, align2)
+        return self._compute_distance(align1, align2, Verbose)
 
 
 # TESTS
-word1 = ["P", "AA", "R", "T"]
-word2 = ['P', 'AA', 'R', "T", "Z"]
+s = Syllabifier()
+word1 = s.to_phoneme("part")
+word2 = s.to_phoneme("parts")
+word3 = s.to_phoneme("party")
 wd = WordDistance()
-distance, seq1, seq2 = wd.word_dist(word1, word2)
-print(seq1)
-print(seq2)
-print(f"Distance = {distance}")
+print(f"Distance = {wd.word_dist(word1, word2, True)}")
+print("-------------")
+print(f"Distance = {wd.word_dist(word1, word3, True)}")
+print("-------------")
+print(f"Distance = {wd.word_dist(word2, word3, True)}")
+
+print(wd.phoneme_distances['S']['IY'])
