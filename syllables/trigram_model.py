@@ -45,7 +45,7 @@ def create_model():
 
 def pronouncable(syllable: str, thresh=0.02, verbose=False):
     """
-    :param syllable: Input syllable, eg: ['T', 'EH', 'S', 'T']
+    :param syllable: Input syllable, eg: ('T', 'EH', 'S', 'T')
     :param thresh: minimum conditional prob for all tuples in syllable
     """
     if not os.path.exists(COND_PROBS_PATH):
@@ -57,11 +57,11 @@ def pronouncable(syllable: str, thresh=0.02, verbose=False):
     if all(p in consonants for p in syllable):  # No vowel sounds
         return False
     else:
-        syllable = ['<s>'] + syllable + ['</s>']
-        trigrams = list(ngrams(syllable, 3))
+        syllable = ('<s>',) + syllable + ('</s>',)
+        trigrams = ngrams(syllable, 3)
 
         # Get conditional probabilities for phoneme trigram
-        cond_probs = list(map(lambda tuple: cond_probs_dict[tuple], trigrams))
+        cond_probs = map(lambda t: cond_probs_dict[t], trigrams)
 
         if verbose:
             print(dict(zip(trigrams, cond_probs)))
@@ -76,8 +76,11 @@ def pronouncable(syllable: str, thresh=0.02, verbose=False):
 # t2 = ['CH', 'K', 'AE', 'T', 'K']
 # t3 = ['T', 'EY']
 # t4 = ['OW']
-# s = Syllabifier()
-# print(pronouncable(t1, 0.015, True))
+w1 = ("K", "AA", "T")
+w2 = ("K", "T")
+w3 = ()
+s = Syllabifier()
+print(pronouncable(w1, 0.02, True))
 # print(pronouncable(t2, 0.015, True))
 # print(pronouncable(t3, 0.015, True))
 # print(pronouncable(t4, 0.015, True))
