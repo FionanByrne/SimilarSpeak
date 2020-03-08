@@ -11,11 +11,12 @@ class WordDistance:
     vowels = ['AA', 'AE', 'AH', 'AO', 'AW', 'AY', 'EH',
               'ER', 'EY', 'IH', 'IY', 'OW', 'OY', 'UH', 'UW']
 
-    def __init__(self, target):
+    def __init__(self, phoneme_word):
         # Import CMU pronunciation dictionary
         self.gap_penalty = 0.5
         self.cons_vowel_dist = 1
-        self.target = self._syllables_to_word(target)  # Target phoneme word
+        self.phoneme1_weight = 1.5  # Weight given to first aligned phoneme
+        self.target = self._syllables_to_word(phoneme_word)  # Target phoneme word
         self.phoneme_distances = self._create_distances()
 
     def get_phoneme_distance(self, phoneme1, phoneme2):
@@ -62,8 +63,8 @@ class WordDistance:
     def _compute_distance(self, align1, align2, Verbose):
         align1.reverse()
         align2.reverse()
-        distance = 0
-        for i in range(0, len(align1)):
+        distance = self.phoneme1_weight * self.get_phoneme_distance(align1[0], align2[0])
+        for i in range(1, len(align1)):
             distance += self.get_phoneme_distance(align1[i], align2[i])
         if Verbose:
             print(align1)
@@ -136,7 +137,10 @@ class WordDistance:
 
 # TESTS
 # s = Syllabifier()
-# wd = WordDistance([["K", "AE", "T"], ["ER"]])
-# w1 = [["D", "AW", "G"]]
-# print(f"Distance = {wd.word_dist(w1, True)}")
+# t1 = [["T", "AA", "T"], ["ER"]]
+# t2 = [["D", "AA", "T"], ["ER"]]
+# t3 = [["T", "AA", "D"], ["ER"]]
+# wd = WordDistance(t1)
+# print(f"Distance = {wd.word_dist(t2, True)}")
+# print(f"Distance = {wd.word_dist(t3, True)}")
 # print("-------------")

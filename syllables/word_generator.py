@@ -1,9 +1,11 @@
 import cmudict
 import itertools
-from collections import OrderedDict
 from trigram_model import pronouncable
 from syllabifier import Syllabifier
 from word_distance import WordDistance
+from phoneme_word import PhonemeWord
+import operator
+from collections import OrderedDict
 
 
 def generate_1edits(phoneme_sylls, thresh=0.015):
@@ -73,22 +75,18 @@ def find_edits1(syll, change_onsets=True, change_codas=True, thresh=0.015):
     return syll_edits
 
 
-def closest_edits(word):
+def closest_edits1(word, num_entries=100):
     wd = WordDistance(word)
     sim_words = {}
     for pos, syll in enumerate(word):
-        print(pos, syll)
         for syll_swap in find_edits1(syll):
-            print(syll_swap)
             sim_word = word[:pos] + [syll_swap] + word[pos+1:]
-            print(sim_word)
+            pw = PhonemeWord(sim_word)
+            # sim_word = tuple(tuple(syll) for syll in sim_word)
             word_dist = wd.word_dist(sim_word)
-            print(word_dist)
-            sim_words[sim_word] = word_dist
+            sim_words[pw] = word_dist
     # Order sim_words by ascending distance
-    sim_words = {k: v for k, v in sorted(sim_words.items(),
-                                         key=lambda item: item[1])}
-    return sim_words
+    return dict(sorted(sim_words.items(), key=operator.itemgetter(1))[:num_entries])
 
 
 def find_edits2(syll):
@@ -97,18 +95,7 @@ def find_edits2(syll):
 
 
 # TEST
-w1 = "cat"
-w2 = "cats"
-s = Syllabifier()
-t1 = s.to_syllables(s.to_phoneme(w1))
-t2 = s.to_syllables(s.to_phoneme(w2))
-
-x = closest_edits([["K", "AE", "T"], ["ER"]])
-for i in x:
-    print(i)
-
-# print("syll = ", t1)
-# res1 = find_edits1(t1[0])
-# for i in res1:
-#     print(i)
-# print(len(res1))
+# x = closest_edits1([["D", "AW", "G"], ["ER"]], num_entries=100)
+# for k, v in x.items():
+#     print(k, "==", v)
+# print(f"Number of words generated = {len(x)}")
