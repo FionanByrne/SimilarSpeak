@@ -73,11 +73,11 @@ def pronouncable(syllable: str, thresh=0.02, verbose=False):
 # # TEST
 # create_model()
 # t1 = ['AH', 'T', 'L']
-# t2 = ['T', 'S', 'T']
+# t2 = ['CH', 'K', 'AE', 'T', 'K']
 # t3 = ['T', 'EY']
 # t4 = ['OW']
 # s = Syllabifier()
-# print(pronouncable(t1, 0.01, True))
-# print(pronouncable(t2, 0.01, True))
-# print(pronouncable(t3, 0.01, True))
-# print(pronouncable(t4, 0.01, True))
+# print(pronouncable(t1, 0.015, True))
+# print(pronouncable(t2, 0.015, True))
+# print(pronouncable(t3, 0.015, True))
+# print(pronouncable(t4, 0.015, True))

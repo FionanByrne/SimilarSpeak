@@ -1,20 +1,25 @@
 import pandas as pd
 import numpy as np
 from syllabifier import Syllabifier
+import itertools
 
 CONSONANTS_MATRIX_FILE = "bailey_consonants.csv"
 VOWEL_MATRIX_FILE = "bailey_vowels.csv"
 
 
 class WordDistance:
+    vowels = ['AA', 'AE', 'AH', 'AO', 'AW', 'AY', 'EH',
+              'ER', 'EY', 'IH', 'IY', 'OW', 'OY', 'UH', 'UW']
 
-    def __init__(self):
+    def __init__(self, target):
         # Import CMU pronunciation dictionary
-        self.gap_penalty = 1.0
+        self.gap_penalty = 0.5
+        self.cons_vowel_dist = 1
+        self.target = self._syllables_to_word(target)  # Target phoneme word
         self.phoneme_distances = self._create_distances()
 
     def get_phoneme_distance(self, phoneme1, phoneme2):
-        return self.phoneme_distances[phoneme1][phoneme1]
+        return self.phoneme_distances[phoneme1][phoneme2]
 
     def _read_matrix(self, matrix_name):
         """
@@ -42,7 +47,7 @@ class WordDistance:
         # Append consonant & phoneme matrices. Set empty values to max distance
         phoneme_distances = consonant_distances.append(vowel_distances,
                                                        sort=False)
-        phoneme_distances = phoneme_distances.fillna(self.gap_penalty)
+        phoneme_distances = phoneme_distances.fillna(self.cons_vowel_dist)
 
         # Add gap penalty column and row:
         phoneme_distances['-'] = self.gap_penalty
@@ -50,6 +55,9 @@ class WordDistance:
         phoneme_distances.loc['-'] = gap_row
 
         return phoneme_distances
+
+    def _syllables_to_word(self, syllables):
+        return list(itertools.chain.from_iterable(syllables))
 
     def _compute_distance(self, align1, align2, Verbose):
         align1.reverse()
@@ -63,15 +71,18 @@ class WordDistance:
 
         return distance
 
-    def word_dist(self, word1, word2, Verbose=False):
+    def word_dist(self, word, Verbose=False):
         """
         Using matrices, compute distance between two words.
         Words are computed in their non-syllabified form, eg:
-        ["R", "AA", K, "AH", "T"]
+        [["IH", "N"], ["T", "UW"]] -> ["IH", "N" ,"T", "UW"]
 
         params: words1, word2: list of phonemes, eg: ""
         """
-        m, n = len(word1), len(word2)
+        # Revert back to non syllable form
+        word = self._syllables_to_word(word)
+
+        m, n = len(self.target), len(word)
         score = np.zeros((m+1, n+1))  # Initialize scoring matrix
 
         # Calculate scoring matrix according to Needleman-Wunsch algorithm
@@ -82,12 +93,11 @@ class WordDistance:
         for i in range(1, m + 1):
             for j in range(1, n + 1):
                 match = score[i - 1][j - 1] + \
-                        self.get_phoneme_distance(word1[i-1], word2[j-1])
+                        self.get_phoneme_distance(self.target[i-1], word[j-1])
                 delete = score[i - 1][j] + self.gap_penalty
                 insert = score[i][j - 1] + self.gap_penalty
                 score[i][j] = min(match, delete, insert)
 
-        # Traceback and compute the alignment
         align1, align2 = [], []
         i, j = m, n  # Begin at the bottom right entry
         while i > 0 and j > 0:  # While not at the top left entry
@@ -97,43 +107,36 @@ class WordDistance:
             score_left = score[i-1][j]
 
             if (score_current == score_diag
-                    + self.get_phoneme_distance(word1[i-1], word2[j-1])):
-                align1.append(word1[i-1])
-                align2.append(word2[j-1])
+                    + self.get_phoneme_distance(self.target[i-1], word[j-1])):
+                align1.append(self.target[i-1])
+                align2.append(word[j-1])
                 i -= 1
                 j -= 1
             elif score_current == score_left + self.gap_penalty:
-                align1.append(word1[i-1])
+                align1.append(self.target[i-1])
                 align2.append('-')
                 i -= 1
             elif score_current == score_up + self.gap_penalty:
                 align1.append('-')
-                align2.append(word2[j-1])
+                align2.append(word[j-1])
                 j -= 1
 
-        # Back trace up to the top left
+        # Back trace up to the top left entry
         while i > 0:
-            align1.append(word1[i-1])
+            align1.append(self.target[i-1])
             align2.append('-')
             i -= 1
         while j > 0:
             align1.append('-')
-            align2.append(word2[j-1])
+            align2.append(word[j-1])
             j -= 1
 
         return self._compute_distance(align1, align2, Verbose)
 
 
 # TESTS
-s = Syllabifier()
-word1 = s.to_phoneme("part")
-word2 = s.to_phoneme("parts")
-word3 = s.to_phoneme("party")
-wd = WordDistance()
-print(f"Distance = {wd.word_dist(word1, word2, True)}")
-print("-------------")
-print(f"Distance = {wd.word_dist(word1, word3, True)}")
-print("-------------")
-print(f"Distance = {wd.word_dist(word2, word3, True)}")
-
-print(wd.phoneme_distances['S']['IY'])
+# s = Syllabifier()
+# wd = WordDistance([["K", "AE", "T"], ["ER"]])
+# w1 = [["D", "AW", "G"]]
+# print(f"Distance = {wd.word_dist(w1, True)}")
+# print("-------------")

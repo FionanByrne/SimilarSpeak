@@ -207,8 +207,8 @@ class Syllabifier:
 # # TESTS
 # from collections import Counter
 # import cmudict
-# # Test if every syllable in arpabet dictionary has one vowel sound
-# def num_vowels(self, syll):
+# Test if every syllable in arpabet dictionary has one vowel sound
+# def num_vowels(syll):
 #     vowels = [i[0] for i in cmudict.phones() if i[1] == ['vowel']]
 #     return len(list((Counter(syll) & Counter(vowels)).elements()))
 
@@ -219,3 +219,8 @@ class Syllabifier:
 #     for syll in syllables_list:
 #         if num_vowels(syll) != 1:
 #             print(word, ": ", syllables_list)
+
+# Test Syllabifier on word
+# s = Syllabifier()
+# print(s.to_syllables(s.to_phoneme("humblest")))
+# print(s.to_syllables(s.to_phoneme("unbalanced")))
