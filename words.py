@@ -114,12 +114,15 @@ def search(json_word):
         print(f'FION:{sylls_input}', file=sys.stderr)
         for sim_word, dist in closest_edits1(sylls_input, 100).items():
             print(f'FION:{sim_word}, {dist}', file=sys.stderr)
-            # print(f'{sim_word}, {dist}', file=sys.stderr)
+            print(f'{sim_word}, {dist}', file=sys.stderr)
 
-            string_sim_word = " ".join(list(chain.from_iterable(sim_word)))
+            valid_word = "True"
 
-            new_word = Word(word_name=string_sim_word,
-                            distance=dist)
+            # string_sim_word = " ".join(list(chain.from_iterable(sim_word)))
+
+            new_word = Word(word_name="test",
+                            distance=dist,
+                            valid=valid_word)
             db.session.add(new_word)  # Add entry to words db
 
         db.session.commit()

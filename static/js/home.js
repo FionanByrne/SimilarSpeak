@@ -131,6 +131,7 @@ ns.view = (function() {
                     rows += `<tr data-word-id="${words[i].word_id}">
                         <td class="word_name">${words[i].word_name}</td>
                         <td>${words[i].distance}</td>
+                        <td>${words[i].valid}</td>
                     </tr>`;
                 }
                 $('table > tbody').append(rows);
@@ -225,8 +226,8 @@ ns.controller = (function(m, v) {
             alert('Problem with word name input');
         }
         e.preventDefault();
-    }); 
-    
+    });
+
     $('#reset').click(function() {
         view.reset();
     })

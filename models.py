@@ -6,6 +6,7 @@ class Word(db.Model):
     word_id = db.Column(db.Integer, primary_key=True)
     word_name = db.Column(db.String(32))
     distance = db.Column(db.Float, default=0.5)
+    valid = db.Column(db.String(32), nullable=False)
 
 
 class WordSchema(ma.ModelSchema):

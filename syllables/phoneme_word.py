@@ -1,6 +1,7 @@
 class PhonemeWord:
     def __init__(self, phoneme_word):
         self.phoneme_word = phoneme_word
+        self.valid = False
 
     def __eq__(self, other):
         return (

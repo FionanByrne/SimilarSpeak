@@ -35,6 +35,9 @@ paths:
                 distance:
                   type: string
                   description: Distance from target
+                valid:
+                  type: string
+                  description: Valid word or nonsense
 
     post:
       operationId: words.create
@@ -67,6 +70,9 @@ paths:
               distance:
                 type: string
                 description: Distance from target
+              valid:
+                type: string
+                description: Valid word or nonsense
 
   /words/search:
     post:
@@ -100,6 +106,9 @@ paths:
               distance:
                 type: string
                 description: Distance from target
+              valid:
+                type: string
+                description: Valid word or nonsense
 
   /words/{word_id}:
     get:
@@ -129,6 +138,9 @@ paths:
               distance:
                 type: string
                 description: Distance from target
+              valid:
+                type: string
+                description: Valid word or nonsense
 
     put:
       operationId: words.update
@@ -164,6 +176,9 @@ paths:
               distance:
                 type: string
                 description: Distance from target
+              valid:
+                type: string
+                description: Valid word or nonsense
 
     delete:
       operationId: words.delete
