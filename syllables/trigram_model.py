@@ -72,7 +72,7 @@ def pronouncable(syllable: str, thresh=0.02, verbose=False):
 
 # # TEST
 # create_model()
-# t1 = ['AH', 'T', 'L']
+# t1 = ['HH', 'R', 'EH', 'D']
 # t2 = ['CH', 'K', 'AE', 'T', 'K']
 # t3 = ['T', 'EY']
 # t4 = []

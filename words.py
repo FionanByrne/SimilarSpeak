@@ -111,18 +111,15 @@ def search(json_word):
         # flat = " ".join(list(itertools.chain.from_iterable(syllable_word)))
         schema = WordSchema()
         sylls_input = syllab.to_syllables(syllab.to_phoneme(word_name))
-        print(f'FION:{sylls_input}', file=sys.stderr)
-        for sim_word, dist in closest_edits1(sylls_input, 100).items():
-            print(f'FION:{sim_word}, {dist}', file=sys.stderr)
-            print(f'{sim_word}, {dist}', file=sys.stderr)
-
-            valid_word = "True"
+        # print(f'FION:{sylls_input}', file=sys.stderr)
+        for sim_word, dist, valid_word in closest_edits1(sylls_input, 100):
+            # print(f'FION:{sim_word}, {dist}', file=sys.stderr)
 
             # string_sim_word = " ".join(list(chain.from_iterable(sim_word)))
 
-            new_word = Word(word_name="test",
+            new_word = Word(word_name=sim_word,
                             distance=dist,
-                            valid=valid_word)
+                            valid=str(valid_word))
             db.session.add(new_word)  # Add entry to words db
 
         db.session.commit()

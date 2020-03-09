@@ -10,12 +10,12 @@ class WordDistance:
     vowels = ['AA', 'AE', 'AH', 'AO', 'AW', 'AY', 'EH',
               'ER', 'EY', 'IH', 'IY', 'OW', 'OY', 'UH', 'UW']
 
-    def __init__(self, syllable_word):
+    def __init__(self, target_word):
         # Import CMU pronunciation dictionary
         self.gap_penalty = 0.5
         self.cons_vowel_dist = 1
         self.phoneme1_weight = 1.5  # Weight given to first aligned phoneme
-        self.target = self._syllables_to_word(syllable_word)  # Target word
+        self.target = target_word  # Target word
         self.phoneme_distances = self._create_distances()
 
     def phoneme_dist(self, phoneme1, phoneme2):
@@ -56,8 +56,8 @@ class WordDistance:
 
         return phoneme_distances
 
-    def _syllables_to_word(self, syllables):
-        return list(itertools.chain.from_iterable(syllables))
+    # def _syllables_to_word(self, syllables):
+    #     return list(itertools.chain.from_iterable(syllables))
 
     def _compute_distance(self, align1, align2, Verbose):
         align1.reverse()
@@ -77,11 +77,9 @@ class WordDistance:
         Using matrices, compute distance between two words.
         Words are computed in their non-syllabified form, eg:
         [["IH", "N"], ["T", "UW"]] -> ["IH", "N" ,"T", "UW"]
-
-        params: words1, word2: list of phonemes, eg: ""
         """
         # Revert back to non syllable form
-        word = self._syllables_to_word(word)
+        # word = self._syllables_to_word(word)
 
         m, n = len(self.target), len(word)
         score = np.zeros((m+1, n+1))  # Initialize scoring matrix

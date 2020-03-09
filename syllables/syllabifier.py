@@ -1,6 +1,5 @@
 import nltk
 import os
-import re
 
 ADDITIONAL_WORDS_PATH = "syllables/data/dictionary.txt"
 
@@ -54,22 +53,6 @@ class Syllabifier:
 
     def is_valid(self, word):
         return word in self.arpabet
-
-    def _remove_digits(self, phonemes):
-        """
-        Remove stress markers from phoneme translation
-        :param phonemes: input list of phonemes (strings)
-        """
-        return [re.sub('[0-9]', '', i) for i in phonemes]
-
-    def phoneme_to_text(self, phonemes):
-        """
-        Find all text words and word combinations in arpabet that map to input
-        """
-        for word, translations in self.arpabet.items():
-            translations = list(map(self._remove_digits, translations))
-            if phonemes in translations:
-                return word
 
     def to_phoneme(self, input_word):
         """
