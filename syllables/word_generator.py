@@ -1,11 +1,8 @@
-import cmudict
 import itertools
-from trigram_model import pronouncable
-from syllabifier import Syllabifier
-from word_distance import WordDistance
-from phoneme_word import PhonemeWord
+from syllables.trigram_model import pronouncable
+from syllables.word_distance import WordDistance
+from syllables.phoneme_word import PhonemeWord
 import operator
-from collections import OrderedDict
 
 
 def generate_1edits(phoneme_sylls, thresh=0.015):
@@ -53,17 +50,20 @@ def find_edits1(syll, change_onsets=True, change_codas=True, thresh=0.015):
     # Vowel edits:
     vowel_swaps = [[i] for i in vowels if [i] != vowel[0]]
     vowel_edits = (onset + v + coda for v in vowel_swaps)
-    syll_edits += list(filter(lambda syll: pronouncable(syll, thresh), vowel_edits))
+    syll_edits += list(filter(lambda syll:
+                       pronouncable(syll, thresh), vowel_edits))
     # Onset edits:
     if(change_onsets):
         onset_swaps = consonant_edits(onset)
         onset_edits = (o + vowel + coda for o in onset_swaps)
-        syll_edits += list(filter(lambda syll: pronouncable(syll, thresh), onset_edits))
+        syll_edits += list(filter(lambda syll:
+                           pronouncable(syll, thresh), onset_edits))
     # Coda edits
     if(change_codas):
         coda_swaps = consonant_edits(coda)
         coda_edits = (onset + vowel + c for c in coda_swaps)
-        syll_edits += list(filter(lambda syll: pronouncable(syll, thresh), coda_edits))
+        syll_edits += list(filter(lambda syll:
+                           pronouncable(syll, thresh), coda_edits))
 
     # if(change_codas and change_onsets):
     #     for o in onset_swaps:
@@ -75,18 +75,23 @@ def find_edits1(syll, change_onsets=True, change_codas=True, thresh=0.015):
     return syll_edits
 
 
-def closest_edits1(word, num_entries=100):
+def closest_edits1(word, n=100):
+    """
+    :param word: Syllabified phoneme word, e.g. : [["IH", "N"], ["T", "UW"]]
+    :return: Dictionary of n generated nonsense words
+    """
     wd = WordDistance(word)
     sim_words = {}
     for pos, syll in enumerate(word):
         for syll_swap in find_edits1(syll):
             sim_word = word[:pos] + [syll_swap] + word[pos+1:]
-            pw = PhonemeWord(sim_word)
-            # sim_word = tuple(tuple(syll) for syll in sim_word)
             word_dist = wd.word_dist(sim_word)
+            pw = PhonemeWord(sim_word)
             sim_words[pw] = word_dist
+
+    return sim_words
     # Order sim_words by ascending distance
-    return dict(sorted(sim_words.items(), key=operator.itemgetter(1))[:num_entries])
+    # return dict(sorted(sim_words.items(), key=operator.itemgetter(1))[:n])
 
 
 def find_edits2(syll):
@@ -95,7 +100,8 @@ def find_edits2(syll):
 
 
 # TEST
-# x = closest_edits1([["D", "AW", "G"], ["ER"]], num_entries=100)
+# from syllabifier import Syllabifier
+# x = closest_edits1([["D", "AW", "G"], ["ER"]], n=100)
 # for k, v in x.items():
 #     print(k, "==", v)
 # print(f"Number of words generated = {len(x)}")

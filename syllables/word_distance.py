@@ -1,6 +1,5 @@
 import pandas as pd
 import numpy as np
-from syllabifier import Syllabifier
 import itertools
 
 CONSONANTS_MATRIX_FILE = "bailey_consonants.csv"
@@ -11,15 +10,15 @@ class WordDistance:
     vowels = ['AA', 'AE', 'AH', 'AO', 'AW', 'AY', 'EH',
               'ER', 'EY', 'IH', 'IY', 'OW', 'OY', 'UH', 'UW']
 
-    def __init__(self, phoneme_word):
+    def __init__(self, syllable_word):
         # Import CMU pronunciation dictionary
         self.gap_penalty = 0.5
         self.cons_vowel_dist = 1
         self.phoneme1_weight = 1.5  # Weight given to first aligned phoneme
-        self.target = self._syllables_to_word(phoneme_word)  # Target phoneme word
+        self.target = self._syllables_to_word(syllable_word)  # Target word
         self.phoneme_distances = self._create_distances()
 
-    def get_phoneme_distance(self, phoneme1, phoneme2):
+    def phoneme_dist(self, phoneme1, phoneme2):
         return self.phoneme_distances[phoneme1][phoneme2]
 
     def _read_matrix(self, matrix_name):
@@ -63,14 +62,15 @@ class WordDistance:
     def _compute_distance(self, align1, align2, Verbose):
         align1.reverse()
         align2.reverse()
-        distance = self.phoneme1_weight * self.get_phoneme_distance(align1[0], align2[0])
+        # Apply weight to first phonemes of alignments
+        dist = self.phoneme1_weight * self.phoneme_dist(align1[0], align2[0])
         for i in range(1, len(align1)):
-            distance += self.get_phoneme_distance(align1[i], align2[i])
+            dist += self.phoneme_dist(align1[i], align2[i])
         if Verbose:
             print(align1)
             print(align2)
 
-        return distance
+        return dist
 
     def word_dist(self, word, Verbose=False):
         """
@@ -94,7 +94,7 @@ class WordDistance:
         for i in range(1, m + 1):
             for j in range(1, n + 1):
                 match = score[i - 1][j - 1] + \
-                        self.get_phoneme_distance(self.target[i-1], word[j-1])
+                        self.phoneme_dist(self.target[i-1], word[j-1])
                 delete = score[i - 1][j] + self.gap_penalty
                 insert = score[i][j - 1] + self.gap_penalty
                 score[i][j] = min(match, delete, insert)
@@ -108,7 +108,7 @@ class WordDistance:
             score_left = score[i-1][j]
 
             if (score_current == score_diag
-                    + self.get_phoneme_distance(self.target[i-1], word[j-1])):
+                    + self.phoneme_dist(self.target[i-1], word[j-1])):
                 align1.append(self.target[i-1])
                 align2.append(word[j-1])
                 i -= 1
@@ -136,6 +136,7 @@ class WordDistance:
 
 
 # TESTS
+# from syllabifier import Syllabifier
 # s = Syllabifier()
 # t1 = [["T", "AA", "T"], ["ER"]]
 # t2 = [["D", "AA", "T"], ["ER"]]

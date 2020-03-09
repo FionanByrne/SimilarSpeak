@@ -37,10 +37,6 @@ wheels/
 *.manifest
 *.spec
 
-# Installer logs
-pip-log.txt
-pip-delete-this-directory.txt
-
 # Unit test / coverage reports
 htmlcov/
 .tox/
@@ -76,6 +72,7 @@ target/
 # Jupyter Notebook
 .ipynb_checkpoints
 .ipynb
+syllables/test_generators.ipynb
 
 # pyenv
 .python-version

@@ -1,6 +1,6 @@
 import nltk
 import os
-# import sys
+import re
 
 ADDITIONAL_WORDS_PATH = "syllables/data/dictionary.txt"
 
@@ -22,8 +22,10 @@ class Syllabifier:
             for line in dic_file:
                 line = line.split()
                 if line[0] == "-":
+                    # Remove entry from initial dict
                     init_dict.pop(line[1].lower())
                 else:
+                    # Add additional word to dict
                     init_dict[line[0].lower()] = [line[1:]]
 
         return init_dict
@@ -52,6 +54,22 @@ class Syllabifier:
 
     def is_valid(self, word):
         return word in self.arpabet
+
+    def _remove_digits(self, phonemes):
+        """
+        Remove stress markers from phoneme translation
+        :param phonemes: input list of phonemes (strings)
+        """
+        return [re.sub('[0-9]', '', i) for i in phonemes]
+
+    def phoneme_to_text(self, phonemes):
+        """
+        Find all text words and word combinations in arpabet that map to input
+        """
+        for word, translations in self.arpabet.items():
+            translations = list(map(self._remove_digits, translations))
+            if phonemes in translations:
+                return word
 
     def to_phoneme(self, input_word):
         """
@@ -220,7 +238,6 @@ class Syllabifier:
 #         if num_vowels(syll) != 1:
 #             print(word, ": ", syllables_list)
 
-# Test Syllabifier on word
-# s = Syllabifier()
+# # Test on word
 # print(s.to_syllables(s.to_phoneme("humblest")))
 # print(s.to_syllables(s.to_phoneme("unbalanced")))

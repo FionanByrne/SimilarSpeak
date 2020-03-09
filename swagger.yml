@@ -76,7 +76,7 @@ paths:
       summary: Search for a word
       description: Search for a new word
       parameters:
-        - name: word
+        - name: json_word
           in: body
           description: Word to search for
           required: True

@@ -5,10 +5,11 @@ words data
 
 from flask import make_response, abort
 from syllables.syllabifier import Syllabifier
+from syllables.word_generator import closest_edits1
+from itertools import chain
 from config import db
 from models import Word, WordSchema
-# import sys
-import itertools
+import sys
 
 
 def read_all():
@@ -96,38 +97,30 @@ def create(word):
         )
 
 
-def search(word):
+def search(json_word):
     """
     This function searches for a word
 
     :param word:  word (json) to search in words structure
     :return:        201 on success, 406 on word exists
     """
-    word_name = word.get("word_name").lower()
-    syllabifier = Syllabifier()
+    word_name = json_word.get("word_name").lower()
+    syllab = Syllabifier()
     # Is input word defined?
-    if syllabifier.is_valid(word_name):
-        # "many" -> "['M', 'EH', 'N', 'IY']"
-        phoneme_word = syllabifier.to_phoneme(word_name)
-
-        # "['M', 'EH', 'N', 'IY']" -> [['M', 'EH'], ['N', 'IY']]
-        syllable_word = syllabifier.to_syllables(phoneme_word)
-        # print(f'SYLLABLES: {syllable_word}', file=sys.stdout)
-
-        # [['M', 'EH'], ['N', 'IY']] -> "M EH N IY"
-        syllable_word_flat = \
-            " ".join(list(itertools.chain.from_iterable(syllable_word)))
-
-        # TODO:
-        WORDS = [
-            {"word_name": syllable_word_flat, "distance": 0.1}
-        ]
-
+    if syllab.is_valid(word_name):
+        # flat = " ".join(list(itertools.chain.from_iterable(syllable_word)))
         schema = WordSchema()
-        for word in WORDS:
-            new_word = Word(word_name=word.get("word_name"),
-                            distance=word.get("distance"))
-            db.session.add(new_word)
+        sylls_input = syllab.to_syllables(syllab.to_phoneme(word_name))
+        print(f'FION:{sylls_input}', file=sys.stderr)
+        for sim_word, dist in closest_edits1(sylls_input, 100).items():
+            print(f'FION:{sim_word}, {dist}', file=sys.stderr)
+            # print(f'{sim_word}, {dist}', file=sys.stderr)
+
+            string_sim_word = " ".join(list(chain.from_iterable(sim_word)))
+
+            new_word = Word(word_name=string_sim_word,
+                            distance=dist)
+            db.session.add(new_word)  # Add entry to words db
 
         db.session.commit()
 

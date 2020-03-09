@@ -10,6 +10,7 @@ import config
 import os
 import syllables.trigram_model
 from config import db
+# import sys
 
 # Get the application instance
 connex_app = config.connex_app

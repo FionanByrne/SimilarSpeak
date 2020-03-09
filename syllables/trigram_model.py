@@ -3,7 +3,7 @@ from nltk import ngrams, TrigramCollocationFinder, BigramCollocationFinder
 import pickle
 import os
 import itertools
-from syllabifier import Syllabifier
+from syllables.syllabifier import Syllabifier
 
 COND_PROBS_PATH = "syllables/data/cond_probs.p"
 
