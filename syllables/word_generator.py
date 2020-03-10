@@ -87,27 +87,27 @@ def closest_edits1(word, n=100):
     :param word: Syllabified phoneme word, e.g. : [["IH", "N"], ["T", "UW"]]
     :return: Dictionary of n generated nonsense words
     """
-    wd = WordDistance(join_syllables(word))
-    sim_words = {}
+    word_joined = join_syllables(word)
+    wd = WordDistance(word_joined)
+    # print(f'FION4":{word}', file=sys.stderr)
+    # sim_words = {}
     for pos, syll in enumerate(word):
         for syll_swap in find_edits1(syll):
             sim_sylls_word = word[:pos] + [syll_swap] + word[pos+1:]
-            sim_sylls_joined = join_syllables(sim_sylls_word)
+            sim_phoneme_word = join_syllables(sim_sylls_word)
+            word_dist = wd.word_dist(sim_phoneme_word)
+            sim_word = phoneme_to_text(sim_phoneme_word)
             # print(f'FION2":{sim_sylls_word}', file=sys.stderr)
-            word_dist = wd.word_dist(sim_sylls_joined)
-            # print(f'FION3":{word_dist}', file=sys.stderr)
-            sim_word = phoneme_to_text(sim_sylls_joined)
-            # print(f'FION4":{sim_word}', file=sys.stderr)
             if sim_word:
                 valid_word = True
             else:
                 valid_word = False
-                sim_word = nonsense_to_text(sim_sylls_joined)
+                sim_word = nonsense_to_text(sim_phoneme_word)
 
             # pw = PhonemeWord(sim_word)
             # sim_words[pw] = word_dist
-
-            yield sim_word, word_dist, valid_word
+            if word_joined != sim_phoneme_word:
+                yield sim_word, str(sim_phoneme_word), word_dist, valid_word
 
     # return sim_words
     # Order sim_words by ascending distance

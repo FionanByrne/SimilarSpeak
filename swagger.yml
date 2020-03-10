@@ -32,6 +32,9 @@ paths:
                 word_name:
                   type: string
                   description: The word itself
+                phonetic_name:
+                  type: string
+                  description: Phonetic representation
                 distance:
                   type: string
                   description: Distance from target
@@ -67,6 +70,9 @@ paths:
               word_name:
                 type: string
                 description: Name of word itself
+              phonetic_name:
+                  type: string
+                  description: Phonetic representation
               distance:
                 type: string
                 description: Distance from target
@@ -103,6 +109,9 @@ paths:
               word_name:
                 type: string
                 description: Name of word itself
+              phonetic_name:
+                  type: string
+                  description: Phonetic representation
               distance:
                 type: string
                 description: Distance from target
@@ -135,6 +144,9 @@ paths:
               word_name:
                 type: string
                 description:  name of the word
+              phonetic_name:
+                  type: string
+                  description: Phonetic representation
               distance:
                 type: string
                 description: Distance from target
@@ -173,6 +185,9 @@ paths:
               word_name:
                 type: string
                 description: Name of the word
+              phonetic_name:
+                  type: string
+                  description: Phonetic representation
               distance:
                 type: string
                 description: Distance from target

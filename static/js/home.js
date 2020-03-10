@@ -130,6 +130,7 @@ ns.view = (function() {
                 for (let i=0, l=words.length; i < l; i++) {
                     rows += `<tr data-word-id="${words[i].word_id}">
                         <td class="word_name">${words[i].word_name}</td>
+                        <td>${words[i].phonetic_name}</td>
                         <td>${words[i].distance}</td>
                         <td>${words[i].valid}</td>
                     </tr>`;

@@ -20,7 +20,7 @@ def read_all():
     :return:        json string of list of words
     """
     # Create the list of words from our data
-    words = Word.query.order_by(Word.word_name).all()
+    words = Word.query.order_by(Word.distance).all()
 
     # Serialize the data for the response
     word_schema = WordSchema(many=True)
@@ -112,12 +112,13 @@ def search(json_word):
         schema = WordSchema()
         sylls_input = syllab.to_syllables(syllab.to_phoneme(word_name))
         # print(f'FION:{sylls_input}', file=sys.stderr)
-        for sim_word, dist, valid_word in closest_edits1(sylls_input, 100):
+        for sim_word, sim_phoneme_word, dist, valid_word in closest_edits1(sylls_input, 100):
             # print(f'FION:{sim_word}, {dist}', file=sys.stderr)
 
             # string_sim_word = " ".join(list(chain.from_iterable(sim_word)))
 
             new_word = Word(word_name=sim_word,
+                            phonetic_name=sim_phoneme_word,
                             distance=dist,
                             valid=str(valid_word))
             db.session.add(new_word)  # Add entry to words db
