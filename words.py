@@ -24,7 +24,7 @@ def read_all():
 
     # Serialize the data for the response
     word_schema = WordSchema(many=True)
-    data = word_schema.dump(words).data
+    data = word_schema.dump(words)
     return data
 
 
@@ -109,24 +109,35 @@ def search(json_word):
     # Is input word defined?
     if syllab.is_valid(word_name):
         # flat = " ".join(list(itertools.chain.from_iterable(syllable_word)))
-        schema = WordSchema()
         sylls_input = syllab.to_syllables(syllab.to_phoneme(word_name))
-        # print(f'FION:{sylls_input}', file=sys.stderr)
-        for sim_word, sim_phoneme_word, dist, valid_word in closest_edits1(sylls_input, 100):
-            # print(f'FION:{sim_word}, {dist}', file=sys.stderr)
+        schema = WordSchema()
+        sim_words = []
 
-            # string_sim_word = " ".join(list(chain.from_iterable(sim_word)))
+        w1 = Word(word_name="w1",
+                  phonetic_name="p1",
+                  distance="0",
+                  valid=str(True))
+        w2 = Word(word_name="w2",
+                  phonetic_name="p2",
+                  distance="0",
+                  valid=str(True))
+        xwords = [w1, w2]
+        db.session.add(w1)
+        db.session.add(w2)
 
-            new_word = Word(word_name=sim_word,
-                            phonetic_name=sim_phoneme_word,
-                            distance=dist,
-                            valid=str(valid_word))
-            db.session.add(new_word)  # Add entry to words db
+        # for sim_word, sim_phoneme_word, dist, valid_word in closest_edits1(sylls_input, 100):
+        #     # string_sim_word = " ".join(list(chain.from_iterable(sim_word)))
+        #     new_word = Word(word_name=sim_word,
+        #                     phonetic_name=sim_phoneme_word,
+        #                     distance=dist,
+        #                     valid=str(valid_word))
+        #     db.session.add(new_word)  # Add entry to words db
 
         db.session.commit()
 
         # Serialize and return the newly created word in the response
-        data = schema.dump(new_word).data
+        data = schema.dumps(xwords, many=True)
+        print(f'FION1:{str(data)}', file=sys.stderr)
         return data, 201
 
     # Otherwise, nope, word does not existy

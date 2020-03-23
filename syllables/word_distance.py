@@ -1,58 +1,61 @@
 import pandas as pd
 import numpy as np
-import itertools
 
 CONSONANTS_MATRIX_FILE = "bailey_consonants.csv"
 VOWEL_MATRIX_FILE = "bailey_vowels.csv"
 
 
 class WordDistance:
-    vowels = ['AA', 'AE', 'AH', 'AO', 'AW', 'AY', 'EH',
-              'ER', 'EY', 'IH', 'IY', 'OW', 'OY', 'UH', 'UW']
+    # vowels = ['AA', 'AE', 'AH', 'AO', 'AW', 'AY', 'EH',
+    #           'ER', 'EY', 'IH', 'IY', 'OW', 'OY', 'UH', 'UW']
 
     def __init__(self, target_word):
         # Import CMU pronunciation dictionary
         self.gap_penalty = 0.5
-        self.cons_vowel_dist = 1
-        self.phoneme1_weight = 1.5  # Weight given to first aligned phoneme
+        self.cons_vowel_dist = 1.01  # Must be > 1
+        self.phoneme1_weight = 1.25  # Weight given to first aligned phoneme
         self.target = target_word  # Target word
         self.phoneme_distances = self._create_distances()
 
     def phoneme_dist(self, phoneme1, phoneme2):
-        return self.phoneme_distances[phoneme1][phoneme2]
+        if phoneme1 == phoneme2:
+            return 0
+        elif phoneme1 == "-" or phoneme2 == "-":
+            return self.gap_penalty
+        else:
+            return self.phoneme_distances[phoneme1][phoneme2]
 
     def _read_matrix(self, matrix_name):
         """
-        :param matrix_name: name of csv file, eg: "consonants.csmv"
+        :param matrix_name: name of csv file, eg: "consonants.csv"
         :return: pandas.core.frame.DataFrame object
         """
         matrix_path = 'syllables/matrices/' + matrix_name
         return pd.read_csv(matrix_path, index_col=0, na_values="null").dropna()
 
-    def _normalize_matrix(self, dataset):
+    def _normalize_matrix(self, dataset, scaler=1):
         min_val = dataset.min().min()
         max_val = dataset.max().max()
-        return (dataset - min_val)/(max_val - min_val)
+        return scaler * (dataset - min_val)/(max_val - min_val)
 
     def _create_distances(self):
         """
         Create DataFrame matrix from files containing all phoneme distances
         """
+        # Consonant Matrix (normalize between 0 and 1)
         consonant_distances = self._read_matrix(CONSONANTS_MATRIX_FILE)
         consonant_distances = self._normalize_matrix(consonant_distances)
 
+        # Vowel Matrix (normalize between 0 and gap_penalty)
         vowel_distances = self._read_matrix(VOWEL_MATRIX_FILE)
-        vowel_distances = self._normalize_matrix(vowel_distances)
+        vowel_distances = self._normalize_matrix(vowel_distances,
+                                                 self.gap_penalty)
 
-        # Append consonant & phoneme matrices. Set empty values to max distance
+        # Append consonant & phoneme matrices
         phoneme_distances = consonant_distances.append(vowel_distances,
                                                        sort=False)
+        # Set empty values (cons-vowel dist) to constant
         phoneme_distances = phoneme_distances.fillna(self.cons_vowel_dist)
-
-        # Add gap penalty column and row:
-        phoneme_distances['-'] = self.gap_penalty
-        gap_row = [self.gap_penalty] * len(phoneme_distances.columns)
-        phoneme_distances.loc['-'] = gap_row
 
         return phoneme_distances
 
@@ -134,12 +137,5 @@ class WordDistance:
 
 
 # TESTS
-# from syllabifier import Syllabifier
-# s = Syllabifier()
-# t1 = [["T", "AA", "T"], ["ER"]]
-# t2 = [["D", "AA", "T"], ["ER"]]
-# t3 = [["T", "AA", "D"], ["ER"]]
-# wd = WordDistance(t1)
-# print(f"Distance = {wd.word_dist(t2, True)}")
-# print(f"Distance = {wd.word_dist(t3, True)}")
-# print("-------------")
+# wd = WordDistance(["K", "AA", "T", "Z"])
+# print("Distance = {}".format(wd.word_dist(["D", "AW", "G"], True)))

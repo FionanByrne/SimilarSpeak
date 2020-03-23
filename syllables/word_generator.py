@@ -8,23 +8,16 @@ import operator
 import sys
 
 
-def generate_1edits(phoneme_sylls, thresh=0.05):
-    """
-    Generate pronouncable word 1 Levenshtein edit distance away
+# def generate_1edits(phoneme_sylls, thresh=0.05):
+#     if len(phoneme_sylls) == 1:  # 1-syllable word
+#         return find_edits1(phoneme_sylls[0])
+#     else:
+#         similar_syllables = []
+#         for syll in phoneme_sylls:
+#             similar_syllables.append(find_edits1(syll))
 
-    :param phoneme_sylls: List of phonemes; e.g. [['M', 'EH'], ['N', 'IY']]
-    :param thresh: Min conditional probability for accepting pronouncablity
-    """
-    if len(phoneme_sylls) == 1:  # 1-syllable word
-        return find_edits1(phoneme_sylls[0])
-    else:
-        similar_syllables = []
-        for syll in phoneme_sylls:
-            similar_syllables.append(find_edits1(syll))
-
-        # Return cartesian product of generated syllables (as list of lists)
-        sim_words = map(list, list(product(*similar_syllables)))
-        return (sim_words)
+#         sim_words = map(list, list(product(*similar_syllables)))
+#         return (sim_words)
 
 
 def consonant_edits(phonemes):
