@@ -1,23 +1,12 @@
 from syllables.trigram_model import pronouncable
 from syllables.word_distance import WordDistance
 from syllables.phoneme_word import PhonemeWord
-from syllables.syllabifier import Syllabifier
+# from syllables.syllabifier import Syllabifier
 from syllables.text_mapper import phoneme_to_text, nonsense_to_text
-from itertools import chain, product
+from itertools import chain
+import time
 import operator
 import sys
-
-
-# def generate_1edits(phoneme_sylls, thresh=0.05):
-#     if len(phoneme_sylls) == 1:  # 1-syllable word
-#         return find_edits1(phoneme_sylls[0])
-#     else:
-#         similar_syllables = []
-#         for syll in phoneme_sylls:
-#             similar_syllables.append(find_edits1(syll))
-
-#         sim_words = map(list, list(product(*similar_syllables)))
-#         return (sim_words)
 
 
 def consonant_edits(phonemes):
@@ -35,6 +24,13 @@ def consonant_edits(phonemes):
 
 
 def find_edits1(syll, change_onsets=True, change_codas=True, thresh=0.05):
+    '''
+    Find all possible pronouncable edits for given syllable
+    Params:
+    syll: input syllable, e.g. ["T", "EH", "S", "T"]
+    change_onsets: determines if sound before vowel is kept
+    change_codas: determines if sound after vowel is kept
+    '''
     # Split syllable into (oneset, vowel, coda)
     vowels = ['AA', 'AE', 'AH', 'AO', 'AW', 'AY', 'EH',
               'ER', 'EY', 'IH', 'IY', 'OW', 'OY', 'UH', 'UW']
@@ -75,36 +71,32 @@ def join_syllables(sylls_word):
     return list(chain.from_iterable(sylls_word))
 
 
-def closest_edits1(word, n=100):
+def closest_edits1(word_name, word_syllabified, n=100):
     """
-    :param word: Syllabified phoneme word, e.g. : [["IH", "N"], ["T", "UW"]]
+    Params:
+    word_name: input word in plain text, e.g. "into"
+    word_syllabified: Syllabified word, e.g.: [["IH", "N"], ["T", "UW"]]
+    n: max number of entires to search
     :return: Dictionary of n generated nonsense words
     """
-    word_joined = join_syllables(word)
+    word_joined = join_syllables(word_syllabified)
     wd = WordDistance(word_joined)
-    # print(f'FION4":{word}', file=sys.stderr)
-    # sim_words = {}
-    for pos, syll in enumerate(word):
+    iteration = 0
+    sim_words = {}
+    for pos, syll in enumerate(word_syllabified):
         for syll_swap in find_edits1(syll):
-            sim_sylls_word = word[:pos] + [syll_swap] + word[pos+1:]
+            iteration += 1
+            sim_sylls_word = word_syllabified[:pos] + [syll_swap] + word_syllabified[pos+1:]
             sim_phoneme_word = join_syllables(sim_sylls_word)
             word_dist = wd.word_dist(sim_phoneme_word)
-            sim_word = phoneme_to_text(sim_phoneme_word)
-            # print(f'FION2":{sim_sylls_word}', file=sys.stderr)
-            if sim_word:
-                valid_word = True
-            else:
-                valid_word = False
-                sim_word = nonsense_to_text(sim_phoneme_word)
+            sim_word, valid_word = phoneme_to_text(sim_phoneme_word)
+            # print(f'FION5:{sim_phoneme_word}', file=sys.stderr)
+            if (sim_word != word_name):
+                pw = PhonemeWord(sim_phoneme_word, sim_word, valid_word)
+                sim_words[pw] = word_dist
 
-            # pw = PhonemeWord(sim_word)
-            # sim_words[pw] = word_dist
-            if word_joined != sim_phoneme_word:
-                yield sim_word, str(sim_phoneme_word), word_dist, valid_word
-
-    # return sim_words
-    # Order sim_words by ascending distance
-    # return dict(sorted(sim_words.items(), key=operator.itemgetter(1))[:n])
+    print(f'FION6:{iteration}', file=sys.stderr)
+    return sim_words
 
 
 # TEST

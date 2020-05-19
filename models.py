@@ -1,4 +1,5 @@
 from config import db, ma
+# from flask_wtf import FlaskForm
 
 
 class Word(db.Model):
@@ -7,7 +8,11 @@ class Word(db.Model):
     word_name = db.Column(db.String(32))
     phonetic_name = db.Column(db.String(32))
     distance = db.Column(db.Float, default=0.5)
-    valid = db.Column(db.String(32), nullable=False)
+    valid_word = db.Column(db.String(32), nullable=False)
+
+
+# class Ratings(db.Model):
+#     score = SelectField('score', choices=[('1', 'one')])
 
 
 class WordSchema(ma.ModelSchema):

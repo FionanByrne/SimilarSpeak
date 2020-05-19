@@ -38,7 +38,7 @@ paths:
                 distance:
                   type: string
                   description: Distance from target
-                valid:
+                valid_word:
                   type: string
                   description: Valid word or nonsense
 
@@ -76,7 +76,7 @@ paths:
               distance:
                 type: string
                 description: Distance from target
-              valid:
+              valid_word:
                 type: string
                 description: Valid word or nonsense
 
@@ -115,7 +115,7 @@ paths:
               distance:
                 type: string
                 description: Distance from target
-              valid:
+              valid_word:
                 type: string
                 description: Valid word or nonsense
 
@@ -150,7 +150,7 @@ paths:
               distance:
                 type: string
                 description: Distance from target
-              valid:
+              valid_word:
                 type: string
                 description: Valid word or nonsense
 
@@ -191,7 +191,7 @@ paths:
               distance:
                 type: string
                 description: Distance from target
-              valid:
+              valid_word:
                 type: string
                 description: Valid word or nonsense
 

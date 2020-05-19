@@ -132,7 +132,7 @@ ns.view = (function() {
                         <td class="word_name">${words[i].word_name}</td>
                         <td>${words[i].phonetic_name}</td>
                         <td>${words[i].distance}</td>
-                        <td>${words[i].valid}</td>
+                        <td>${words[i].valid_word}</td>
                     </tr>`;
                 }
                 $('table > tbody').append(rows);

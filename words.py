@@ -7,6 +7,7 @@ from flask import make_response, abort
 from syllables.syllabifier import Syllabifier
 from syllables.word_generator import closest_edits1
 from itertools import chain
+import time
 from config import db
 from models import Word, WordSchema
 import sys
@@ -104,43 +105,41 @@ def search(json_word):
     :param word:  word (json) to search in words structure
     :return:        201 on success, 406 on word exists
     """
+    # Word.query.delete()
     word_name = json_word.get("word_name").lower()
+    print(f'Searching for similar words to {word_name}...', file=sys.stderr)
     syllab = Syllabifier()
     # Is input word defined?
     if syllab.is_valid(word_name):
-        # flat = " ".join(list(itertools.chain.from_iterable(syllable_word)))
+        print(f'Word {word_name} is valid', file=sys.stderr)
         sylls_input = syllab.to_syllables(syllab.to_phoneme(word_name))
         schema = WordSchema()
         sim_words = []
+        start = time.time()
 
-        w1 = Word(word_name="w1",
-                  phonetic_name="p1",
-                  distance="0",
-                  valid=str(True))
-        w2 = Word(word_name="w2",
-                  phonetic_name="p2",
-                  distance="0",
-                  valid=str(True))
-        xwords = [w1, w2]
-        db.session.add(w1)
-        db.session.add(w2)
-
-        # for sim_word, sim_phoneme_word, dist, valid_word in closest_edits1(sylls_input, 100):
-        #     # string_sim_word = " ".join(list(chain.from_iterable(sim_word)))
-        #     new_word = Word(word_name=sim_word,
-        #                     phonetic_name=sim_phoneme_word,
-        #                     distance=dist,
-        #                     valid=str(valid_word))
-        #     db.session.add(new_word)  # Add entry to words db
+        for phonemeword, dist in closest_edits1(word_name, sylls_input, 100).items():
+            # string_sim_word = " ".join(list(chain.from_iterable(sim_word)))
+            text_word = phonemeword.text_word
+            phonetic_name = str(phonemeword.phoneme_word)
+            valid_word = phonemeword.valid_word
+            print(f"VALID:{valid_word}", file=sys.stderr)
+            new_word = Word(word_name=text_word,
+                            phonetic_name=phonetic_name,
+                            distance=dist,
+                            valid_word=valid_word)
+            db.session.add(new_word)  # Add to words database
+            sim_words.append(new_word)
 
         db.session.commit()
 
         # Serialize and return the newly created word in the response
-        data = schema.dumps(xwords, many=True)
-        print(f'FION1:{str(data)}', file=sys.stderr)
+        data = schema.dumps(sim_words, many=True)
+        time_elapsed = time.time() - start
+        print(f'EXECUTION_TIME: {time_elapsed // 60: .2f} mins \
+             {time_elapsed % 60: .2f} seconds', file=sys.stderr)
         return data, 201
 
-    # Otherwise, nope, word does not existy
+    # Otherwise, word does not exist
     else:
         abort(
             409,
@@ -229,7 +228,7 @@ def delete(word_id):
             "Word {word_id} deleted".format(word_id=word_id), 200
         )
 
-    # Otherwise, nope, didn't find that word
+    # Otherwise, word not found
     else:
         abort(
             404,

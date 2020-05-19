@@ -1,11 +1,8 @@
-from itertools import chain
-
-
 class PhonemeWord:
-    def __init__(self, sylls_word):
-        self.sylls_word = sylls_word
-        self.phones = " ".join(list(chain.from_iterable(self.sylls_word)))
-        self.valid = False
+    def __init__(self, phoneme_word, text_word, valid_word):
+        self.phoneme_word = phoneme_word
+        self.text_word = text_word
+        self.valid_word = valid_word
 
     def __eq__(self, other):
         return (
@@ -18,3 +15,12 @@ class PhonemeWord:
 
     def __repr__(self):
         return f"{self.phoneme_word}"
+
+    def phoneme_word(self):
+        return self.phoneme_word
+
+    def text_word(self):
+        return self.text_word
+
+    def valid_word(self):
+        return self.valid

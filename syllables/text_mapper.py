@@ -14,16 +14,20 @@ def _remove_digits(phonemes):
 
 def phoneme_to_text(phonemes):
     """
-    Find all text words and word combinations in arpabet that map to input
+    Find first phoneme-text translation in arpabet that map to phoneme input,
+    and determine if word is valid
     """
     syllab = Syllabifier()
     arpabet = syllab.arpabet.items()
+    valid_word = "N"
+    # Look up word in cmudict
     for word, translations in arpabet:
         translations = list(map(_remove_digits, translations))
         if phonemes in translations:
-            return word
+            valid_word = "Y"
+            return word, valid_word  # valid word
 
-    return ""  # nonsense word
+    return nonsense_to_text(phonemes), valid_word  # nonsense word
 
 
 def nonsense_to_text(phonemes):

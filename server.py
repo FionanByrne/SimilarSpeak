@@ -10,6 +10,7 @@ import config
 import os
 import syllables.trigram_model
 from config import db
+import models
 # import sys
 
 # Get the application instance
@@ -22,8 +23,7 @@ connex_app.add_api("swagger.yml")
 @connex_app.route("/")
 def home():
     """
-    This function just responds to the browser URL
-    localhost:5000/
+    Respond to browser url localhost:5000/
 
     :return:        the rendered template "home.html"
     """
