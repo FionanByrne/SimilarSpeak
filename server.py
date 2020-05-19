@@ -1,8 +1,8 @@
 """
-Main module of the server file
+Main file for running flask server
 """
 
-# 3rd party moudles
+# 3rd party moudle(s)
 from flask import render_template
 
 # local modules
@@ -10,13 +10,11 @@ import config
 import os
 import syllables.trigram_model
 from config import db
-import models
-# import sys
 
-# Get the application instance
+# application instance
 connex_app = config.connex_app
 
-# Read the swagger.yml file to configure the endpoints
+# Configure API endpoints
 connex_app.add_api("swagger.yml")
 
 # create a URL route in our application for "/"

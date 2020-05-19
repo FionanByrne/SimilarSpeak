@@ -1,12 +1,6 @@
-/*
- * JavaScript file for the application to demonstrate
- * using the API
- */
-
-// Create the namespace instance
+// Namespace instance
 let ns = {};
 
-// Create the model instance
 ns.model = (function() {
     'use strict';
 
@@ -102,14 +96,13 @@ ns.model = (function() {
     };
 }());
 
-// Create the view instance
+// View instance
 ns.view = (function() {
     'use strict';
 
     let $word_id = $('#word_id'),
         $word_name = $('#word_name');
 
-    // return the API
     return {
         reset: function() {
             $word_id.val('');
@@ -122,10 +115,9 @@ ns.view = (function() {
         build_table: function(words) {
             let rows = ''
 
-            // clear the table
             $('.words table > tbody').empty();
 
-            // did we get a words array?
+            // was a words array returned?
             if (words) {
                 for (let i=0, l=words.length; i < l; i++) {
                     rows += `<tr data-word-id="${words[i].word_id}">
@@ -149,7 +141,7 @@ ns.view = (function() {
     };
 }());
 
-// Create the controller
+// Controller instance
 ns.controller = (function(m, v) {
     'use strict';
 
@@ -164,12 +156,12 @@ ns.controller = (function(m, v) {
         model.read();
     }, 100)
 
-    // Validate input
+    // Ensure non-empty input
     function validate(word_name) {
         return word_name !== "";
     }
 
-    // Create our event handlers
+    // Event handlers for creating, updating etc.
     $('#create').click(function(e) {
         let word_name = $word_name.val();
 

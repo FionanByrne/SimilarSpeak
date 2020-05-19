@@ -66,7 +66,7 @@ def nonsense_to_text(phonemes):
         'JH': 'j',
         'CH': 'ch',
         'B': 'b',
-        'D': 'b',
+        'D': 'd',
         'G': 'g',
         'P': 'p',
         'T': 't',

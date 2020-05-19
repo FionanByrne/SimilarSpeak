@@ -11,6 +11,7 @@ import time
 from config import db
 from models import Word, WordSchema
 import sys
+import os
 
 
 def read_all():
@@ -105,7 +106,9 @@ def search(json_word):
     :param word:  word (json) to search in words structure
     :return:        201 on success, 406 on word exists
     """
-    # Word.query.delete()
+    if os.path.exists("data/words.db"):
+        os.remove("data/words.db")
+    db.create_all()
     word_name = json_word.get("word_name").lower()
     print(f'Searching for similar words to {word_name}...', file=sys.stderr)
     syllab = Syllabifier()
@@ -122,7 +125,6 @@ def search(json_word):
             text_word = phonemeword.text_word
             phonetic_name = str(phonemeword.phoneme_word)
             valid_word = phonemeword.valid_word
-            print(f"VALID:{valid_word}", file=sys.stderr)
             new_word = Word(word_name=text_word,
                             phonetic_name=phonetic_name,
                             distance=dist,
