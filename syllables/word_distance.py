@@ -3,17 +3,21 @@ import numpy as np
 
 CONSONANTS_MATRIX_FILE = "bailey_consonants.csv"
 VOWEL_MATRIX_FILE = "bailey_vowels.csv"
+GAP_PENALTY = 0.5
 
 
 class WordDistance:
-    # vowels = ['AA', 'AE', 'AH', 'AO', 'AW', 'AY', 'EH',
-    #           'ER', 'EY', 'IH', 'IY', 'OW', 'OY', 'UH', 'UW']
+    vowels = ['AA', 'AE', 'AH', 'AO', 'AW', 'AY', 'EH',
+              'ER', 'EY', 'IH', 'IY', 'OW', 'OY', 'UH', 'UW']
+
+    # cons = ['B', 'CH', 'D', 'DH', 'F', 'G', 'HH', 'JH', 'K', 'L', 'M', 'N',
+    #     'NG', 'P', 'R', 'S', 'SH', 'T', 'TH', 'V', 'W', 'Y', 'Z', 'ZH']
 
     def __init__(self, target_word):
         # Import CMU pronunciation dictionary
-        self.gap_penalty = 0.5
+        self.gap_penalty = GAP_PENALTY
         self.cons_vowel_dist = 1.01  # Must be > 1
-        self.phoneme1_weight = 1.5  # Weight given to first aligned phoneme
+        self.phoneme1_weight = 2  # Weight given to first aligned phoneme
         self.target = target_word  # Target word
         self.phoneme_distances = self._create_distances()
 
@@ -37,6 +41,17 @@ class WordDistance:
         min_val = dataset.min().min()
         max_val = dataset.max().max()
         return scaler * (dataset - min_val)/(max_val - min_val)
+
+    def closest_consonants(self, phoneme, thresh=0.4):
+        '''
+        Return all consonants within threshold
+        '''
+        closest_cons = []
+        for c in self.cons:
+            if self.phoneme_dist(phoneme, c) <= thresh and c != phoneme:
+                closest_cons.append(c)
+
+        return closest_cons
 
     def _create_distances(self):
         """
@@ -85,7 +100,7 @@ class WordDistance:
         # word = self._syllables_to_word(word)
 
         m, n = len(self.target), len(word)
-        score = np.zeros((m+1, n+1))  # Initialize scoring matrix
+        score = np.zeros((m+1, n+1))
 
         # Calculate scoring matrix according to Needleman-Wunsch algorithm
         for i in range(0, m + 1):

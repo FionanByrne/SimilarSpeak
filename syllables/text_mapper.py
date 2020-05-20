@@ -20,14 +20,22 @@ def phoneme_to_text(phonemes):
     syllab = Syllabifier()
     arpabet = syllab.arpabet.items()
     valid_word = "N"
+    words = {}
     # Look up word in cmudict
     for word, translations in arpabet:
         translations = list(map(_remove_digits, translations))
-        if phonemes in translations:
-            valid_word = "Y"
-            return word, valid_word  # valid word
 
-    return nonsense_to_text(phonemes), valid_word  # nonsense word
+        for t in translations:
+            if phonemes == t:
+                valid_word = "Y"
+                words[word] = valid_word
+
+    if valid_word == "Y":
+        return words
+    else:  # Nonsense word
+        nonsense_text = nonsense_to_text(phonemes)
+        words[nonsense_text] = valid_word
+        return words  # nonsense word
 
 
 def nonsense_to_text(phonemes):

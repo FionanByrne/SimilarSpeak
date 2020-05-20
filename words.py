@@ -5,9 +5,9 @@ words data
 
 from flask import make_response, abort
 from syllables.syllabifier import Syllabifier
-from syllables.word_generator import closest_edits1
-from itertools import chain
-import time
+from syllables.word_generator import closest_edits
+# from itertools import chain
+# import time
 from config import db
 from models import Word, WordSchema
 import sys
@@ -114,13 +114,17 @@ def search(json_word):
     syllab = Syllabifier()
     # Is input word defined?
     if syllab.is_valid(word_name):
-        print(f'Word {word_name} is valid', file=sys.stderr)
+        # print(f'Word {word_name} is valid', file=sys.stderr)
         sylls_input = syllab.to_syllables(syllab.to_phoneme(word_name))
         schema = WordSchema()
         sim_words = []
-        start = time.time()
+        # start = time.time()
 
-        for phonemeword, dist in closest_edits1(word_name, sylls_input, 100).items():
+        results, average_dist, ex_time = closest_edits(word_name,
+                                                       sylls_input,
+                                                       max_entries=40)
+
+        for phonemeword, dist in results.items():
             # string_sim_word = " ".join(list(chain.from_iterable(sim_word)))
             text_word = phonemeword.text_word
             phonetic_name = str(phonemeword.phoneme_word)
@@ -136,9 +140,9 @@ def search(json_word):
 
         # Serialize and return the newly created word in the response
         data = schema.dumps(sim_words, many=True)
-        time_elapsed = time.time() - start
-        print(f'EXECUTION_TIME: {time_elapsed // 60: .2f} mins \
-             {time_elapsed % 60: .2f} seconds', file=sys.stderr)
+        # time_elapsed = time.time() - start
+        # print(f'EXECUTION_TIME: {time_elapsed // 60: .2f} mins \
+        #      {time_elapsed % 60: .2f} seconds', file=sys.stderr)
         return data, 201
 
     # Otherwise, word does not exist

@@ -16,13 +16,13 @@ def create_model():
     syllabifier = Syllabifier()
     all_syllables = syllabifier.all_syllables()
 
-    # Count conditional probabilties of phoneme tuples with dictionaries
+    # Count conditional probabilties of phoneme tuples
     tcf = TrigramCollocationFinder.from_words(all_syllables)
     bcf = BigramCollocationFinder.from_words(all_syllables)
     tri_dict = dict(sorted(tcf.ngram_fd.items(), key=lambda t: (-t[1], t[0])))
     bi_dict = dict(sorted(bcf.ngram_fd.items(), key=lambda t: (-t[1], t[0])))
 
-    # Create dictionary for count cond_prob of all phoneme tuples
+    # Create dictionary to count cond prob all phoneme tuples
     accepted_phonemes = [i[0] for i in cmudict.phones()]
     accepted_phonemes.append('<s>')
     accepted_phonemes.append('</s>')
