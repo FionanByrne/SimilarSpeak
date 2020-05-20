@@ -66,7 +66,7 @@ def pronouncable(syllable: str, thresh=0.02, verbose=False):
         if verbose:
             print(dict(zip(trigrams, cond_probs)))
 
-        # Are all cond probs above threshold value
+        # Are all cond probs above threshold value?
         return all(cond_prob > thresh for cond_prob in cond_probs)
 
 

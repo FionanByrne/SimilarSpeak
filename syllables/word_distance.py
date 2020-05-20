@@ -17,7 +17,7 @@ class WordDistance:
         # Import CMU pronunciation dictionary
         self.gap_penalty = GAP_PENALTY
         self.cons_vowel_dist = 1.01  # Must be > 1
-        self.phoneme1_weight = 2  # Weight given to first aligned phoneme
+        self.phoneme1_weight = 1.25  # Weight given to first aligned phoneme
         self.target = target_word  # Target word
         self.phoneme_distances = self._create_distances()
 

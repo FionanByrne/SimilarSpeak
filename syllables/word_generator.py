@@ -6,7 +6,7 @@ from itertools import chain
 import time
 import sys
 
-PRONOUNCIATION_THRESH = 0.03
+PRONOUNCIATION_THRESH = 0.02
 
 
 def consonant_edits(phonemes):
@@ -59,8 +59,8 @@ def find_edits(syll, change_onsets=True, change_codas=True,
     if(change_onsets):
         onset_edits = (onset_swaps + onset_deletes + onset_pre_inserts + onset_post_inserts)
         onset_combos = (o + vowel + coda for o in onset_edits)
-        syll_edits += list(filter(lambda syll:
-                           pronouncable(syll, thresh), onset_combos))
+
+        syll_edits += list(filter(lambda syll: pronouncable(syll, thresh), onset_combos))
     # Coda edits
     if(change_codas):
         coda_edits = (coda_swaps + coda_deletes + coda_pre_inserts + coda_post_inserts)
@@ -68,6 +68,7 @@ def find_edits(syll, change_onsets=True, change_codas=True,
 
         # for i in coda_combos:
         #     print(f'i:{i}', file=sys.stderr)
+
         syll_edits += list(filter(lambda syll:
                            pronouncable(syll, thresh), coda_combos))
 
@@ -90,13 +91,15 @@ def join_syllables(sylls_word):
 
 
 def closest_edits(word_name, word_syllabified, max_entries=75,
-                  distance_threshold=2, experiment=False):
+                  distance_threshold=2, pro_thresh=PRONOUNCIATION_THRESH,
+                  experiment=False):
     """
     Params:
     word_name: input word in plain text, e.g. "into"
     word_syllabified: Syllabified word, e.g.: [["IH", "N"], ["T", "UW"]]
     max_entries: max number of entires to search
     distance_threshold: maximum phoneme distance
+    pro_thresh: minimum threshold for determining pronouncability
     experiment: (boolean) whether to include coda and onset edits
     :return: Dictionary of n generated nonsense words
     """
@@ -108,7 +111,7 @@ def closest_edits(word_name, word_syllabified, max_entries=75,
     start = time.time()
     for pos, syll in enumerate(word_syllabified):
         # Find all edits for this syllable
-        syll_edits = find_edits(syll, thresh=PRONOUNCIATION_THRESH, experiment=experiment)
+        syll_edits = find_edits(syll, thresh=pro_thresh, experiment=experiment)
         iteration = 0
         for syll_swap in syll_edits:
             iteration += 1  # For logging

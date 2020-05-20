@@ -47,9 +47,9 @@ class Syllabifier:
                 all_syllables.append(['<s>'] + syll + ['</s>'])
 
         # Remove duplicate syllables (reducing processing time with less data)
-        # unique_sylls = set(tuple(i) for i in all_syllables)
+        unique_sylls = set(tuple(i) for i in all_syllables)
         # Flatten list of lists into single lists of ordered phonemes
-        return [i for syll in all_syllables for i in syll]
+        return [i for syll in unique_sylls for i in syll]
 
     def is_valid(self, word):
         return word in self.arpabet
