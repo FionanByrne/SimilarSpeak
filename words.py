@@ -122,7 +122,8 @@ def search(json_word):
 
         results, average_dist, ex_time = closest_edits(word_name,
                                                        sylls_input,
-                                                       max_entries=40)
+                                                       max_entries=100,
+                                                       experiment=True)
 
         for phonemeword, dist in results.items():
             # string_sim_word = " ".join(list(chain.from_iterable(sim_word)))

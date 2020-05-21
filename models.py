@@ -11,10 +11,6 @@ class Word(db.Model):
     valid_word = db.Column(db.String(32), nullable=False)
 
 
-# class Ratings(db.Model):
-#     score = SelectField('score', choices=[('1', 'one')])
-
-
 class WordSchema(ma.ModelSchema):
     class Meta:
         model = Word

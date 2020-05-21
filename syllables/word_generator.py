@@ -26,7 +26,7 @@ def consonant_edits(phonemes):
     return swaps, deletes, inserts_pre, inserts_post
 
 
-def find_edits(syll, change_onsets=True, change_codas=True,
+def find_edits(syll, max_entries=100, num_entries=0, change_onsets=True, change_codas=True,
                thresh=PRONOUNCIATION_THRESH, experiment=False):
     '''
     Find all possible pronouncable edits for given syllable
@@ -44,14 +44,16 @@ def find_edits(syll, change_onsets=True, change_codas=True,
     onset, vowel, coda = syll[:vowel_i], [syll[vowel_i]], syll[vowel_i+1:]
     vowels.remove(vowel[0])  # Remove original vowel from possible alternatives
     syll_edits = []
+    num_entries = 0
 
     # Vowel edits:
     vowel_swaps = [[i] for i in vowels if [i] != vowel[0]]
     vowel_edits = (onset + v + coda for v in vowel_swaps)
 
-    syll_edits += list(filter(lambda syll:
-                       pronouncable(syll, thresh), vowel_edits))
+    syll_edits += list(filter(lambda syll: pronouncable(syll, thresh), vowel_edits))
+    num_entries += len(syll_edits)
 
+    # Generate all edits for coda and onset
     onset_swaps, onset_deletes, onset_pre_inserts, onset_post_inserts = consonant_edits(onset)
     coda_swaps, coda_deletes, coda_pre_inserts, coda_post_inserts = consonant_edits(coda)
 
@@ -60,17 +62,26 @@ def find_edits(syll, change_onsets=True, change_codas=True,
         onset_edits = (onset_swaps + onset_deletes + onset_pre_inserts + onset_post_inserts)
         onset_combos = (o + vowel + coda for o in onset_edits)
 
-        syll_edits += list(filter(lambda syll: pronouncable(syll, thresh), onset_combos))
+        for o in onset_combos:
+            if num_entries >= max_entries:
+                print(f'Syllable Edits:{syll_edits}', file=sys.stderr)
+                return syll_edits
+            elif pronouncable(o, thresh):
+                num_entries += 1
+                syll_edits.append(o)
+
     # Coda edits
     if(change_codas):
         coda_edits = (coda_swaps + coda_deletes + coda_pre_inserts + coda_post_inserts)
         coda_combos = (onset + vowel + c for c in coda_edits)
 
-        # for i in coda_combos:
-        #     print(f'i:{i}', file=sys.stderr)
-
-        syll_edits += list(filter(lambda syll:
-                           pronouncable(syll, thresh), coda_combos))
+        for c in coda_combos:
+            if num_entries >= max_entries:
+                print(f'Syllable Edits:{syll_edits}', file=sys.stderr)
+                return syll_edits
+            elif pronouncable(c, thresh):
+                num_entries += 1
+                syll_edits.append(c)
 
     # Generate words by changing both onset and coda
     if(experiment):
@@ -79,10 +90,14 @@ def find_edits(syll, change_onsets=True, change_codas=True,
         for o in onset_edits:
             for c in coda_edits:
                 onset_coda_combo = o + vowel + c
-                if pronouncable(onset_coda_combo, 0.05):
+                if num_entries >= max_entries:
+                    print(f'Syllable Edits:{syll_edits}', file=sys.stderr)
+                    return syll_edits
+                elif pronouncable(onset_coda_combo, thresh):
+                    num_entries += 1
                     syll_edits.append(onset_coda_combo)
 
-    print(f'Words:{syll_edits}', file=sys.stderr)
+    print(f'Syllable Edits:{syll_edits}', file=sys.stderr)
     return syll_edits
 
 
@@ -90,7 +105,7 @@ def join_syllables(sylls_word):
     return list(chain.from_iterable(sylls_word))
 
 
-def closest_edits(word_name, word_syllabified, max_entries=75,
+def closest_edits(word_name, word_syllabified, max_entries=100,
                   distance_threshold=2, pro_thresh=PRONOUNCIATION_THRESH,
                   experiment=False):
     """
@@ -101,7 +116,7 @@ def closest_edits(word_name, word_syllabified, max_entries=75,
     distance_threshold: maximum phoneme distance
     pro_thresh: minimum threshold for determining pronouncability
     experiment: (boolean) whether to include coda and onset edits
-    :return: Dictionary of n generated nonsense words
+    :return: Dictionary of generated words
     """
     word_joined = join_syllables(word_syllabified)
     wd = WordDistance(word_joined)  # For computing distances
@@ -111,7 +126,10 @@ def closest_edits(word_name, word_syllabified, max_entries=75,
     start = time.time()
     for pos, syll in enumerate(word_syllabified):
         # Find all edits for this syllable
-        syll_edits = find_edits(syll, thresh=pro_thresh, experiment=experiment)
+        syll_edits = find_edits(syll, max_entries=max_entries,
+                                num_entries=num_entries,
+                                thresh=pro_thresh,
+                                experiment=experiment)
         iteration = 0
         for syll_swap in syll_edits:
             iteration += 1  # For logging
